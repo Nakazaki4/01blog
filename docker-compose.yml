@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: 01blog-db
+    environment:
+      POSTGRES_USER: abdnour
+      POSTGRES_PASSWORD: abdnour
+      POSTGRES_DB: mainDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-data:
