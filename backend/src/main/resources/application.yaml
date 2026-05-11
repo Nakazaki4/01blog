@@ -1,3 +1,15 @@
 spring:
   application:
     name: 01blog
+  datasource:
+    url: jdbc:postgresql://0.0.0.0:5432/mainDB
+    username: abdnour
+    password: abdnour
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
