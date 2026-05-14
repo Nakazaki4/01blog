@@ -21,14 +21,14 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping()
+    @PostMapping
     @RequestMapping("/signup")
     public ResponseEntity<Void> signupController(@RequestBody SignupRequest signupRequest) {
         authService.signup(signupRequest);
         return ResponseEntity.status(HttpStatus.SEE_OTHER).location(URI.create("/api/auth/login")).build();
     }
 
-    @PostMapping()
+    @PostMapping
     @RequestMapping("/login")
     public ResponseEntity<LoginResponse> loginController(@RequestBody LoginRequest loginRequest){
         User user = authService.login(loginRequest);

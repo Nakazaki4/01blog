@@ -3,6 +3,7 @@ package com.zone01._blog.auth;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,13 +30,30 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // public
+                        .requestMatchers("/api/auth/**", "/api/media/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/users/*",
+                                "/api/users/*/posts",
+                                "/api/users/*/subscribers",
+                                "/api/users/*/subscriptions",
+                                "/api/posts/*",
+                                "/api/posts/*/comments"
+                        ).permitAll()
+                        // admin
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reports/**").hasRole("ADMIN")
+                        // authenticated users
+                        .requestMatchers("/api/reports/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/notifications/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/users/me", "/api/users/*/subscribe").hasAnyRole("USER", "ADMIN")
+
                         .anyRequest().authenticated()
-                ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

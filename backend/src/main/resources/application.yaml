@@ -14,6 +14,10 @@ spring:
     show-sql: true
 
 app:
+  admin:
+    email: abdnour@blog.com
+    username: 1stNakazaki
+    password: no pain no gain
   jwt:
     secret: ${JWT_SECRET:dev-only-secret-please-change-me-to-32-bytes-minimum}
     expiration-ms: 3600000
