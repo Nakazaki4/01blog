@@ -1,14 +1,15 @@
 package com.zone01._blog.auth;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.zone01._blog.auth.dto.LoginRequest;
 import com.zone01._blog.auth.dto.SignupRequest;
 import com.zone01._blog.user.Role;
 import com.zone01._blog.user.User;
 import com.zone01._blog.user.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -20,7 +21,7 @@ public class AuthService {
         this.encoder = encoder;
     }
 
-    public void signup(SignupRequest req) {
+    public User signup(SignupRequest req) {
         if (users.existsByEmail(req.email())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
@@ -31,12 +32,12 @@ public class AuthService {
                 .username(req.username())
                 .email(req.email())
                 .passwordHash(encoder.encode(req.password()))
-                .bio(req.bio())
-                .avatarUrl(req.avatarUrl())
+                .bio(req.bio() != null ? req.bio() : "")
+                .avatarUrl(req.avatarUrl() != null ? req.avatarUrl() : "")
                 .role(Role.USER)
                 .banned(false)
                 .build();
-        users.save(user);
+        return users.save(user);
     }
 
     public User login(LoginRequest req) {

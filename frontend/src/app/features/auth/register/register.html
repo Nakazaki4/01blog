@@ -1,0 +1,35 @@
+<div class="auth-shell">
+    <section class="auth-card">
+        <div>
+            <h1>New <span class="gradient-text">Soldier</span> in the town</h1>
+            <p class="subtitle">Register to continue to the home feed.</p>
+        </div>
+
+        <form (submit)="submit(); $event.preventDefault()">
+            <mat-form-field appearance="outline">
+                <mat-label>Username</mat-label>
+                <input matInput type="text" [(ngModel)]="username" name="username" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" [(ngModel)]="email" name="email" required email>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" [(ngModel)]="password" name="password" required>
+            </mat-form-field>
+
+            @if (error()) {
+                <p class="error">{{ error() }}</p>
+            }
+
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading()">
+                {{ loading() ? 'Registering...' : 'Register' }}
+            </button>
+        </form>
+
+        <p class="footer">You have an account? <a routerLink="/login">Login</a></p>
+    </section>
+</div>
