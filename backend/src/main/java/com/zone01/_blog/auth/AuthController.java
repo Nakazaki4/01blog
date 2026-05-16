@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     private final AuthService authService;
     private final JwtService jwtService;
 
@@ -22,13 +23,15 @@ public class AuthController {
     public ResponseEntity<LoginResponse> signupController(@RequestBody SignupRequest signupRequest) {
         User user = authService.signup(signupRequest);
         String token = jwtService.issue(user);
-        return ResponseEntity.ok(new LoginResponse(token, user.getId(), user.getUsername()));
+        return ResponseEntity.ok(new LoginResponse(token, user.getId(),
+                user.getUsername(), user.getRole()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginController(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<LoginResponse> loginController(@RequestBody LoginRequest loginRequest) {
         User user = authService.login(loginRequest);
         String token = jwtService.issue(user);
-        return ResponseEntity.ok(new LoginResponse(token, user.getId(), user.getUsername()));
+        return ResponseEntity.ok(new LoginResponse(token, user.getId(),
+                user.getUsername(), user.getRole()));
     }
 }
