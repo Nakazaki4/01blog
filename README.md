@@ -451,7 +451,7 @@ Update report status.
 ### `GET /api/media/{filename}`
 Serve an uploaded media file. Public.
 
-**Response 200:** binary content with appropriate `Content-Type` (image/* or video/*).
+**Response 200:** binary content with appropriate `Content-Type` (image/*).
 
 **Errors:** `404` if not found.
 

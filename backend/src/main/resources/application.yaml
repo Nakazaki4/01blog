@@ -1,10 +1,12 @@
 spring:
   application:
     name: 01blog
+  config:
+    import: optional:file:./.env[.properties]
   datasource:
-    url: jdbc:postgresql://0.0.0.0:5432/mainDB
-    username: abdnour
-    password: abdnour
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -15,10 +17,13 @@ spring:
 
 app:
   admin:
-    email: abdnour@blog.com
-    username: 1stNakazaki
-    password: no pain no gain
+    email: ${ADMIN_EMAIL}
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
   jwt:
-    secret: ${JWT_SECRET:dev-only-secret-please-change-me-to-32-bytes-minimum}
-    expiration-ms: 3600000
-
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+  supabase:
+    url: ${SUPABASE_URL}
+    service-key: ${SUPABASE_SERVICE_KEY}
+    bucket: ${SUPABASE_BUCKET:Media}

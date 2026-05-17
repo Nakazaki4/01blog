@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { Inject, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
@@ -19,8 +19,8 @@ export class AuthService {
 
   currentUser = signal<AuthResponse | null>(this.loadFromStorage());
 
-  constructor(private http: HttpClient, private router: Router) {
-  }
+  http = inject(HttpClient)
+  router = inject(Router)
 
   login(username: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`,

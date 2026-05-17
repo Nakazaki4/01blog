@@ -1,23 +1,17 @@
 package com.zone01._blog.post;
 
 import com.zone01._blog.user.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "posts")
+@Getter
+@Setter
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +28,8 @@ public class Post {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
-    @Column(name = "has_media")
-    private Boolean hasMedia;
+    @Column(name = "media_url")
+    private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "media_type", length = 5)
