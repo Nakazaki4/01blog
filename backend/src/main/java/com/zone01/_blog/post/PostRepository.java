@@ -25,6 +25,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             SELECT p,
                     (SELECT COUNT(l) FROM Like l WHERE l.post.id = p.id) AS likeCount,
                     (SELECT COUNT(c) FROM Comment c WHERE c.post.id = p.id) AS commentCount,
+                    false AS isLiked
+            FROM Post p
+            WHERE p.deleted = false
+            """)
+    Page<Object[]> findPublicFeed(Pageable pageable);
+
+    @Query("""
+            SELECT p,
+                    (SELECT COUNT(l) FROM Like l WHERE l.post.id = p.id) AS likeCount,
+                    (SELECT COUNT(c) FROM Comment c WHERE c.post.id = p.id) AS commentCount,
                     (SELECT COUNT(l) > 0 FROM Like l WHERE l.post.id = p.id AND l.user.id = :viewerId) AS isLiked
             FROM Post p
             WHERE p.id = :postId AND p.deleted = false

@@ -1,6 +1,5 @@
 package com.zone01._blog.auth;
 
-import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.DispatcherType;
 
 @Configuration
 public class SecurityConfig {
@@ -41,7 +42,8 @@ public class SecurityConfig {
                                 "/api/users/*/subscribers",
                                 "/api/users/*/subscriptions",
                                 "/api/posts/*",
-                                "/api/posts/*/comments"
+                                "/api/posts/*/comments",
+                                "/api/posts/feed"
                         ).permitAll()
                         // admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
