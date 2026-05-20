@@ -1,1 +1,62 @@
-<p>post works!</p>
+<div class="dialog">
+  <button mat-icon-button class="close" (click)="close()" aria-label="Close">
+    <mat-icon fontIcon="close" />
+  </button>
+
+  <div class="layout">
+    <section class="post-pane">
+      <header class="post-header">
+        @if (post.author.avatarUrl) {
+          <div class="avatar">
+            <img [src]="post.author.avatarUrl" [alt]="post.author.username" />
+          </div>
+        } @else {
+          <div class="avatar avatar-fallback">{{ post.author.username[0] }}</div>
+        }
+        <div class="author-meta">
+          <span class="username">{{ post.author.username }}</span>
+          <time class="created-at">{{ post.createdAt | date: 'medium' }}</time>
+        </div>
+      </header>
+
+      @if (post.mediaUrl) {
+        <div class="media">
+          <img [src]="post.mediaUrl" [alt]="'media for post ' + post.id" />
+        </div>
+      }
+
+      <p class="description">{{ post.description }}</p>
+
+      <footer class="post-stats">
+        <span class="stat" [class.liked]="post.isLiked">
+          <mat-icon class="stat-icon" [fontIcon]="post.isLiked ? 'favorite' : 'favorite_border'" />
+          <span>{{ post.likeCount }} likes</span>
+        </span>
+        <span class="stat">
+          <mat-icon class="stat-icon" fontIcon="chat_bubble_outline" />
+          <span>{{ post.commentCount }} comments</span>
+        </span>
+      </footer>
+    </section>
+
+    <aside class="comments-pane">
+      <h3 class="comments-title">Comments</h3>
+
+      <div class="comments-list">
+        <p class="comments-empty">Be the first to comment.</p>
+      </div>
+
+      @if (isAuthenticated()) {
+        <form class="comment-form">
+          <mat-form-field appearance="outline" class="comment-field">
+            <mat-label>Write a comment…</mat-label>
+            <input matInput type="text" name="comment" disabled />
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="button" disabled>Post</button>
+        </form>
+      } @else {
+        <p class="comment-cta">Log in to leave a comment.</p>
+      }
+    </aside>
+  </div>
+</div>

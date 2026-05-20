@@ -1,0 +1,34 @@
+import { Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+
+@Component({
+  selector: 'app-report-dialog',
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
+  templateUrl: './report-dialog.html',
+  styleUrl: './report-dialog.css',
+})
+export class ReportDialogComponent {
+  reason = signal('');
+
+  constructor(private dialogRef: MatDialogRef<ReportDialogComponent, string>) {}
+
+  submit(): void {
+    const trimmed = this.reason().trim();
+    if (!trimmed) return;
+    this.dialogRef.close(trimmed);
+  }
+
+  cancel(): void {
+    this.dialogRef.close();
+  }
+}

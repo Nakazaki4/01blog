@@ -1,7 +1,32 @@
 <main class="home">
   <header class="home-header">
-    <h1>Welcome <span class="gradient-text">{{ user()?.username }}</span></h1>
-    <button class="pill" type="button" (click)="logout()">Log out</button>
+    @if (user(); as u) {
+      <h1>Welcome <span class="gradient-text">{{ u.username }}</span></h1>
+      <button class="pill" type="button" (click)="logout()">Log out</button>
+    } @else {
+      <h1>Public <span class="gradient-text">feed</span></h1>
+    }
   </header>
-  <p>Your feed will live here.</p>
+
+  @if (loading()) {
+    <p class="status">Loading feed…</p>
+  } @else if (error(); as e) {
+    <p class="error">{{ e }}</p>
+  } @else if (posts().length === 0) {
+    <p class="status">No posts yet.</p>
+  } @else {
+    <section class="feed">
+      @for (p of posts(); track p.id) {
+        <app-post-snippet
+          [post]="p"
+          [canInteract]="isAuthenticated()"
+          [currentUserId]="currentUserId()"
+          (likeToggled)="onLikeToggled($event)"
+          (commentClicked)="onCommentClicked($event)"
+          (edited)="onPostEdited($event)"
+          (deleted)="onPostDeleted($event)"
+          (reported)="onPostReported($event)" />
+      }
+    </section>
+  }
 </main>

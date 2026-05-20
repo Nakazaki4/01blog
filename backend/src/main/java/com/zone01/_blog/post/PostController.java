@@ -28,6 +28,11 @@ public class PostController {
         this.postService = postService;
     }
 
+    private static Long parseViewerId(String principal) {
+        if (principal == null || "anonymousUser".equals(principal)) return -1L;
+        return Long.parseLong(principal);
+    }
+
     @GetMapping("/posts/feed")
     public ResponseEntity<?> feed(
             @AuthenticationPrincipal String userId,
@@ -38,32 +43,31 @@ public class PostController {
             return ResponseEntity.badRequest().body("Size must be between 1 and " + MAX_POSTS);
         }
 
-        if (userId == null) {
+        Long viewerId = parseViewerId(userId);
+        if (viewerId == -1L) {
             return ResponseEntity.ok(postService.getPublicFeed(page, size));
         }
-        return ResponseEntity.ok(postService.getFeed(Long.valueOf(userId), page, size));
+        return ResponseEntity.ok(postService.getFeed(viewerId, page, size));
     }
 
     @GetMapping("/posts/{id}")
     public ResponseEntity<PostResponse> getPost(
             @PathVariable Long id,
             @AuthenticationPrincipal String userId) {
-        Long viewerId = userId != null ? Long.valueOf(userId) : -1L;
-        return ResponseEntity.ok(postService.getById(id, viewerId));
+        return ResponseEntity.ok(postService.getById(id, parseViewerId(userId)));
     }
 
     @GetMapping("/users/{userId}/posts")
     public ResponseEntity<?> userPosts(
             @PathVariable Long userId,
-            @AuthenticationPrincipal String viewerIdStr,
+            @AuthenticationPrincipal String principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         if (size > MAX_POSTS || size <= 0) {
             return ResponseEntity.badRequest().body("Size must be between 1 and " + MAX_POSTS);
         }
-        Long viewerId = viewerIdStr != null ? userId : -1L;
-        return ResponseEntity.ok(postService.getByAuthor(userId, viewerId, page, size));
+        return ResponseEntity.ok(postService.getByAuthor(userId, parseViewerId(principal), page, size));
     }
 
     @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

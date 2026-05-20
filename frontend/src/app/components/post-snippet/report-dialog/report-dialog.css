@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  min-width: 360px;
+}
+
+.hint {
+  margin: 0 0 1rem;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.reason-field {
+  width: 100%;
+}

@@ -38,9 +38,10 @@ public class PostService {
     }
 
     public PostResponse getById(Long postId, Long viewerId) {
-        Object[] row = postRepo.findByIdWithCounts(postId, viewerId)
+        return postRepo.findByIdWithCounts(postId, viewerId).stream()
+                .findFirst()
+                .map(this::toDto)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-        return toDto(row);
     }
 
     public Page<PostResponse> getByAuthor(Long authorId, Long viewerId, int page, int size) {

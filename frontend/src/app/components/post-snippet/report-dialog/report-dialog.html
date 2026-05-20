@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Report this user</h2>
+
+<mat-dialog-content>
+  <p class="hint">Tell us what's wrong. An admin will review this report.</p>
+
+  <mat-form-field appearance="outline" class="reason-field">
+    <mat-label>Reason</mat-label>
+    <textarea
+      matInput
+      rows="5"
+      [ngModel]="reason()"
+      (ngModelChange)="reason.set($event)"
+      name="reason"
+      placeholder="Describe the issue…"
+      required></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="warn"
+    type="button"
+    (click)="submit()"
+    [disabled]="!reason().trim()">
+    Submit report
+  </button>
+</mat-dialog-actions>
