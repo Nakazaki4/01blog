@@ -1,14 +1,14 @@
 package com.zone01._blog.media;
 
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class MediaService {
@@ -38,7 +38,7 @@ public class MediaService {
         try {
             http.post()
                     .uri(uploadUrl)
-                    .header("Authorization", "Bearer " + serviceKey)
+                    .header("apiKey", serviceKey)
                     .header("Content-Type", file.getContentType())
                     .body(file.getBytes())
                     .retrieve()
@@ -55,7 +55,7 @@ public class MediaService {
         String filename = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
         http.delete()
                 .uri(supabaseUrl + "/storage/v1/object/" + bucket + "/" + filename)
-                .header("Authorization", "Bearer " + serviceKey)
+                .header("apiKey", serviceKey)
                 .retrieve()
                 .toBodilessEntity();
     }

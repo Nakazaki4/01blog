@@ -11,6 +11,10 @@ export interface PageResponse<T> {
   size: number;
 }
 
+export interface CreatePostRequest {
+  description: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PostService {
   private http = inject(HttpClient);
@@ -25,5 +29,13 @@ export class PostService {
 
   getById(id: number): Observable<PostResponse> {
     return this.http.get<PostResponse>(`${this.API_URL}/${id}`);
+  }
+
+  create(req: CreatePostRequest): Observable<PostResponse> {
+    return this.http.post<PostResponse>(this.API_URL, req);
+  }
+
+  uploadImage(formData: FormData): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.API_URL}/upload-image`, formData);
   }
 }

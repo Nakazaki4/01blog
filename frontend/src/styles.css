@@ -108,3 +108,35 @@ p {
   background-clip: text;
   color: transparent;
 }
+
+.post-detail-panel {
+  max-width: 95vw !important;
+  width: min(1200px, 95vw);
+}
+
+.post-detail-panel .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 1rem;
+  padding: 0;
+}
+
+.post-detail-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.post-create-panel {
+  max-width: 95vw !important;
+  width: min(1200px, 95vw);
+}
+
+.post-create-panel .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 1rem;
+  padding: 0;
+}
+
+.post-create-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+}

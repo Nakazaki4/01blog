@@ -1,0 +1,55 @@
+<section class="composer">
+  <textarea
+    #editor
+    class="composer-input"
+    placeholder="Share something…"
+    rows="5"
+    [ngModel]="body()"
+    (ngModelChange)="body.set($event)"
+    [disabled]="submitting()"></textarea>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/gif"
+    class="hidden-input"
+    (change)="onFileSelected($event)" />
+
+  <footer class="composer-footer">
+    <div class="composer-actions">
+      <button
+        type="button"
+        mat-button
+        (click)="onPickImage()"
+        [disabled]="uploading() || submitting()">
+        <mat-icon>image</mat-icon>
+        Insert image
+      </button>
+
+      @if (uploading()) {
+        <span class="composer-uploading">
+          <mat-spinner diameter="16" />
+          Uploading image…
+        </span>
+      }
+    </div>
+
+    <div class="composer-submit">
+      <span class="char-counter" [class.short]="tooShort()" [class.long]="tooLong()">
+        {{ charCount() }} / {{ minChars }}–{{ maxChars }}
+      </span>
+      <button
+        type="button"
+        mat-raised-button
+        color="primary"
+        (click)="submit()"
+        [disabled]="uploading() || submitting() || outOfRange()">
+        {{ submitting() ? 'Posting…' : 'Post' }}
+      </button>
+    </div>
+  </footer>
+
+  @if (error(); as e) {
+    <p class="composer-error">{{ e }}</p>
+  }
+</section>

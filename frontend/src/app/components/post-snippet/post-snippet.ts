@@ -6,6 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportDialogComponent } from './report-dialog/report-dialog';
 import { PostDetailComponent, PostDetailData } from '../../features/post/post';
+import { stripMarkdown } from '../../shared/markdown';
 
 export interface PostAuthor {
   id: number;
@@ -17,7 +18,6 @@ export interface PostResponse {
   id: number;
   author: PostAuthor;
   description: string;
-  mediaUrl: string | null;
   likeCount: number;
   commentCount: number;
   isLiked: boolean;
@@ -56,10 +56,10 @@ export class Post {
   });
 
   snippet = computed(() => {
-    const text = this.post().description ?? '';
-    return text.length > SNIPPET_LENGTH
-      ? text.slice(0, SNIPPET_LENGTH).trimEnd() + '…'
-      : text;
+    const stripped = stripMarkdown(this.post().description ?? '');
+    return stripped.length > SNIPPET_LENGTH
+      ? stripped.slice(0, SNIPPET_LENGTH).trimEnd() + '…'
+      : stripped;
   });
 
   openDetail(): void {

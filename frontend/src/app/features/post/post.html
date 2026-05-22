@@ -19,13 +19,7 @@
         </div>
       </header>
 
-      @if (post.mediaUrl) {
-        <div class="media">
-          <img [src]="post.mediaUrl" [alt]="'media for post ' + post.id" />
-        </div>
-      }
-
-      <p class="description">{{ post.description }}</p>
+      <app-post-body [markdown]="post.description" class="description" />
 
       <footer class="post-stats">
         <span class="stat" [class.liked]="post.isLiked">

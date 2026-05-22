@@ -1,5 +1,7 @@
 package com.zone01._blog.post;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zone01._blog.media.MediaService;
+import com.zone01._blog.post.dto.CreatePostRequest;
 import com.zone01._blog.post.dto.PostResponse;
 
 @RestController
@@ -23,9 +28,11 @@ public class PostController {
 
     private static final int MAX_POSTS = 20;
     private final PostService postService;
+    private final MediaService mediaService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, MediaService mediaService) {
         this.postService = postService;
+        this.mediaService = mediaService;
     }
 
     private static Long parseViewerId(String principal) {
@@ -70,22 +77,28 @@ public class PostController {
         return ResponseEntity.ok(postService.getByAuthor(userId, parseViewerId(principal), page, size));
     }
 
-    @PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/posts/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @AuthenticationPrincipal String userId,
+            @RequestParam("image") MultipartFile image) {
+        String url = mediaService.store(image);
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    @PostMapping("/posts")
     public ResponseEntity<PostResponse> create(
             @AuthenticationPrincipal String userId,
-            @RequestParam("description") String description,
-            @RequestParam(value = "media", required = false) MultipartFile media) {
-        PostResponse created = postService.create(Long.valueOf(userId), description, media);
+            @RequestBody CreatePostRequest req) {
+        PostResponse created = postService.create(Long.parseLong(userId), req.description());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping(value = "/posts/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/posts/{id}")
     public ResponseEntity<PostResponse> update(
             @PathVariable Long id,
             @AuthenticationPrincipal String userId,
-            @RequestParam("description") String description,
-            @RequestParam(value = "media", required = false) MultipartFile media) {
-        return ResponseEntity.ok(postService.update(id, Long.valueOf(userId), description, media));
+            @RequestBody CreatePostRequest req) {
+        return ResponseEntity.ok(postService.update(id, Long.parseLong(userId), req.description()));
     }
 
     @DeleteMapping("/posts/{id}")
@@ -95,7 +108,7 @@ public class PostController {
             Authentication auth) {
         boolean isAdmin = auth != null && auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        postService.delete(id, Long.valueOf(userId), isAdmin);
+        postService.delete(id, Long.parseLong(userId), isAdmin);
         return ResponseEntity.noContent().build();
     }
 }

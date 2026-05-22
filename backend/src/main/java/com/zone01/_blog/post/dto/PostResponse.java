@@ -6,7 +6,6 @@ public record PostResponse(
         Long id,
         UserPost author,
         String description,
-        String mediaUrl,
         int likeCount,
         int commentCount,
         boolean isLiked,

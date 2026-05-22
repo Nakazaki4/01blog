@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" routerLink="/" aria-label="Home">
+      <span class="gradient-text">01blog</span>
+    </a>
+
+    @if (isAuthenticated()) {
+      <div class="actions">
+        <button
+          mat-icon-button
+          type="button"
+          class="nav-icon"
+          (click)="openCreatePost()"
+          aria-label="Create post">
+          <mat-icon>add_circle</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          class="nav-icon"
+          (click)="goToProfile()"
+          aria-label="Profile">
+          <mat-icon>person</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+</nav>

@@ -1,0 +1,95 @@
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: #fff;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.composer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--red-to-pink-to-purple-vertical-gradient);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.composer-input {
+  width: 100%;
+  resize: none;
+  flex: 1;
+  min-height: 7rem;
+  border: 1px solid color-mix(in srgb, var(--gray-400) 30%, transparent);
+  border-radius: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  font: inherit;
+  color: var(--gray-900);
+  background: #fff;
+  line-height: 1.5;
+}
+
+.composer-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--electric-violet) 50%, transparent);
+  outline-offset: 1px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.composer-uploading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.composer-error {
+  margin: 0;
+  color: var(--hot-red);
+  font-size: 0.875rem;
+}
+
+.composer-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.char-counter {
+  font-size: 0.8125rem;
+  color: var(--gray-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.char-counter.short,
+.char-counter.long {
+  color: var(--hot-red);
+}

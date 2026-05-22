@@ -53,4 +53,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             WHERE p.user.id = :authorId AND p.deleted = false
             """)
     Page<Object[]> findByAuthorWithCounts(Long authorId, Long viewerId, Pageable pageable);
+
+    List<Post> findByUserIdAndDeletedFalseOrderByCreatedAtDesc(Long userId);
 }

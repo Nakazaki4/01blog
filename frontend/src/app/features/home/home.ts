@@ -1,7 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../auth/auth.service';
 import { PostService } from '../../components/post-snippet/post-snippet.service';
 import { Post, PostReport, PostResponse } from '../../components/post-snippet/post-snippet';
+import { PostEventsService } from '../../shared/post-events.service';
 
 @Component({
   selector: 'app-home',
@@ -12,6 +14,8 @@ import { Post, PostReport, PostResponse } from '../../components/post-snippet/po
 export class HomeComponent implements OnInit {
   private auth = inject(AuthService);
   private postService = inject(PostService);
+  private postEvents = inject(PostEventsService);
+  private destroyRef = inject(DestroyRef);
 
   user = this.auth.currentUser;
   isAuthenticated = computed(() => !!this.user());
@@ -26,6 +30,9 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadFeed();
+    this.postEvents.created$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((post) => this.posts.update((current) => [post, ...current]));
   }
 
   loadFeed(): void {

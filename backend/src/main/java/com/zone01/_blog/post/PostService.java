@@ -1,12 +1,16 @@
 package com.zone01._blog.post;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.media.MediaService;
@@ -17,6 +21,9 @@ import com.zone01._blog.user.UserRepository;
 
 @Service
 public class PostService {
+
+    private static final Pattern MARKDOWN_IMAGE = Pattern.compile("!\\[[^\\]]*\\]\\(([^)\\s]+)\\)");
+
     private final PostRepository postRepo;
     private final UserRepository userRepo;
     private final MediaService mediaService;
@@ -52,27 +59,28 @@ public class PostService {
         return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).map(this::toDto);
     }
 
-    public PostResponse create(Long authorId, String description, MultipartFile media) {
+    public PostResponse create(Long authorId, String description) {
         if (description == null || description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
+        }
+        if (description.length() < 2000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least 2000 characters required");
+        }
+        if (description.length() > 10000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most 10000 characters allowed");
         }
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
-        String mediaUrl = mediaService.store(media);
-
         Post post = new Post();
         post.setUser(author);
         post.setDescription(description);
-        post.setMediaUrl(mediaUrl);
-        post.setMediaType(mediaUrl != null && !mediaUrl.isBlank() ? MediaType.IMAGE : null);
         Post saved = postRepo.save(post);
 
         return new PostResponse(
                 saved.getId(),
                 new UserPost(author.getId(), author.getUsername(), author.getAvatarUrl()),
                 saved.getDescription(),
-                saved.getMediaUrl(),
                 0,
                 0,
                 false,
@@ -80,7 +88,7 @@ public class PostService {
         );
     }
 
-    public PostResponse update(Long postId, Long requesterId, String description, MultipartFile media) {
+    public PostResponse update(Long postId, Long requesterId, String description) {
         Post post = postRepo.findById(postId)
                 .filter(p -> !p.isDeleted())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
@@ -91,16 +99,22 @@ public class PostService {
         if (description == null || description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
         }
-
-        post.setDescription(description);
-
-        if (media != null && !media.isEmpty()) {
-            if (post.getMediaUrl() != null) {
-                mediaService.delete(post.getMediaUrl());
-            }
-            post.setMediaUrl(mediaService.store(media));
+        if (description.length() < 2000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least 2000 characters required");
+        }
+        if (description.length() > 10000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most 10000 characters allowed");
         }
 
+        List<String> previousImages = extractImageUrls(post.getDescription());
+        List<String> nextImages = extractImageUrls(description);
+        for (String url : previousImages) {
+            if (!nextImages.contains(url)) {
+                mediaService.delete(url);
+            }
+        }
+
+        post.setDescription(description);
         postRepo.save(post);
         return getById(postId, requesterId);
     }
@@ -114,8 +128,20 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not the post owner");
         }
         post.setDeleted(true);
-        mediaService.delete(post.getMediaUrl());
+        for (String url : extractImageUrls(post.getDescription())) {
+            mediaService.delete(url);
+        }
         postRepo.save(post);
+    }
+
+    private List<String> extractImageUrls(String markdown) {
+        List<String> urls = new ArrayList<>();
+        if (markdown == null) return urls;
+        Matcher m = MARKDOWN_IMAGE.matcher(markdown);
+        while (m.find()) {
+            urls.add(m.group(1));
+        }
+        return urls;
     }
 
     private PostResponse toDto(Object[] row) {
@@ -132,7 +158,6 @@ public class PostService {
                         p.getUser().getAvatarUrl()
                 ),
                 p.getDescription(),
-                p.getMediaUrl(),
                 (int) likeCount,
                 (int) commentCount,
                 isLiked,

@@ -7,11 +7,13 @@ import { AdminDashboardComponent } from './features/admin/admin-dashboard/admin-
 import { AdminUsersComponent } from './features/admin/admin-users/admin-users';
 import { AdminPostsComponent } from './features/admin/admin-posts/admin-posts';
 import { AdminReportsComponent } from './features/admin/admin-reports/admin-reports';
+import { User } from './features/user/user';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: '', component: HomeComponent },
+  { path: 'profile/:id', component: User },
   {
     path: 'admin',
     canActivate: [adminGuard],
@@ -23,6 +25,4 @@ export const routes: Routes = [
 
     ]
   },
-  // { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
-  // { path: 'profile/:id', component: ProfileComponent, canActivate: [authGuard] }
 ];

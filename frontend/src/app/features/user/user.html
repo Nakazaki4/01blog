@@ -1,1 +1,28 @@
-<p>user works!</p>
+<main class="profile">
+  @if (loading()) {
+    <p class="status">Loading profile…</p>
+  } @else if (error(); as e) {
+    <p class="error">{{ e }}</p>
+  } @else if (profile(); as p) {
+    <header class="profile-header">
+      @if (p.avatarUrl) {
+        <div class="avatar">
+          <img [src]="p.avatarUrl" [alt]="p.username" />
+        </div>
+      } @else {
+        <div class="avatar avatar-fallback">{{ p.username[0] }}</div>
+      }
+      <div class="meta">
+        <h1 class="username">{{ p.username }}</h1>
+        @if (p.bio) {
+          <p class="bio">{{ p.bio }}</p>
+        }
+      </div>
+      @if (isSelf()) {
+        <button class="pill" type="button" (click)="logout()">Log out</button>
+      }
+    </header>
+  } @else {
+    <p class="status">No profile data.</p>
+  }
+</main>

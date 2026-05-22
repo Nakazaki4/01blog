@@ -28,13 +28,6 @@ public class Post {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
-    @Column(name = "media_url")
-    private String mediaUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "media_type", length = 5)
-    private MediaType mediaType;
-
     @Column(nullable = false)
     private boolean deleted = false;
 }

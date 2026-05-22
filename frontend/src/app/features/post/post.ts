@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../auth/auth.service';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
+import { PostBodyComponent } from '../../components/post-body/post-body';
 
 export interface PostDetailData {
   post: PostResponse;
@@ -23,6 +24,7 @@ export interface PostDetailData {
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
+    PostBodyComponent,
   ],
   templateUrl: './post.html',
   styleUrl: './post.css',
