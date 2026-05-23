@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -33,7 +34,7 @@ const SNIPPET_LENGTH = 180;
 
 @Component({
   selector: 'app-post-snippet',
-  imports: [DatePipe, MatIconModule, MatButtonModule, MatMenuModule],
+  imports: [DatePipe, RouterLink, MatIconModule, MatButtonModule, MatMenuModule],
   templateUrl: './post-snippet.html',
   styleUrl: './post-snippet.css',
 })

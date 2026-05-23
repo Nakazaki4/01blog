@@ -28,5 +28,11 @@
           (reported)="onPostReported($event)" />
       }
     </section>
+    @if (hasMore()) {
+      <div #sentinel></div>
+    }
+    @if (loadingMore()) {
+      <p class="status">Loading more…</p>
+    }
   }
 </main>

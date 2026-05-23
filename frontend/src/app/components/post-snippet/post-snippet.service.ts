@@ -27,6 +27,16 @@ export class PostService {
     return this.http.get<PageResponse<PostResponse>>(`${this.API_URL}/feed`, { params });
   }
 
+  getByAuthor(userId: number | string, page = 0, size = 20): Observable<PageResponse<PostResponse>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<PostResponse>>(
+      `http://localhost:8080/api/users/${userId}/posts`,
+      { params },
+    );
+  }
+
   getById(id: number): Observable<PostResponse> {
     return this.http.get<PostResponse>(`${this.API_URL}/${id}`);
   }

@@ -1,6 +1,7 @@
 package com.zone01._blog.user;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,8 +21,11 @@ public class UserController {
     }
 
     @GetMapping("/api/users/{id}")
-    public ResponseEntity<UserProfileResponse> user(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getProfile(id));
+    public ResponseEntity<UserProfileResponse> user(
+            @PathVariable Long id,
+            @AuthenticationPrincipal String principal) {
+        Long viewerId = (principal == null || "anonymousUser".equals(principal)) ? -1L : Long.parseLong(principal);
+        return ResponseEntity.ok(userService.getProfile(id, viewerId));
     }
 
     @GetMapping("/api/users/{id}/posts?page={page_number}")

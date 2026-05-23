@@ -2,15 +2,26 @@
 
 <article class="post-card" (click)="openDetail()" role="link" tabindex="0">
   <header class="post-header">
-    @if (p.author.avatarUrl) {
-    <div class="avatar">
-      <img [src]="p.author.avatarUrl" [alt]="p.author.username" />
-    </div>
-    } @else {
-    <div class="avatar avatar-fallback">{{ p.author.username[0] }}</div>
-    }
+    <a
+      [routerLink]="['/profile', p.author.id]"
+      (click)="$event.stopPropagation()"
+      class="author-link avatar-link"
+      [attr.aria-label]="'View ' + p.author.username + '\'s profile'">
+      @if (p.author.avatarUrl) {
+        <div class="avatar">
+          <img [src]="p.author.avatarUrl" [alt]="p.author.username" />
+        </div>
+      } @else {
+        <div class="avatar avatar-fallback">{{ p.author.username[0] }}</div>
+      }
+    </a>
     <div class="author-meta">
-      <span class="username">{{ p.author.username }}</span>
+      <a
+        [routerLink]="['/profile', p.author.id]"
+        (click)="$event.stopPropagation()"
+        class="author-link username">
+        {{ p.author.username }}
+      </a>
       <time class="created-at">{{ p.createdAt | date: 'medium' }}</time>
     </div>
 

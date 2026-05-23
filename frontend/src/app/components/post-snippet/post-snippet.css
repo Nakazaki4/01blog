@@ -92,6 +92,24 @@
   white-space: nowrap;
 }
 
+.author-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  border-radius: 0.5rem;
+}
+
+.author-link:hover .username,
+.username.author-link:hover {
+  color: var(--bright-blue);
+}
+
+.avatar-link:focus-visible,
+.username.author-link:focus-visible {
+  outline: 2px solid var(--bright-blue);
+  outline-offset: 2px;
+}
+
 .created-at {
   font-size: 0.75rem;
   color: var(--gray-400);

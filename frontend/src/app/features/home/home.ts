@@ -1,9 +1,22 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../auth/auth.service';
 import { PostService } from '../../components/post-snippet/post-snippet.service';
-import { Post, PostReport, PostResponse } from '../../components/post-snippet/post-snippet';
+import { Post, PostResponse } from '../../components/post-snippet/post-snippet';
+import { PostHost } from '../../components/post-snippet/post-host';
 import { PostEventsService } from '../../shared/post-events.service';
+
+const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-home',
@@ -11,7 +24,7 @@ import { PostEventsService } from '../../shared/post-events.service';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent extends PostHost implements OnInit {
   private auth = inject(AuthService);
   private postService = inject(PostService);
   private postEvents = inject(PostEventsService);
@@ -26,7 +39,34 @@ export class HomeComponent implements OnInit {
 
   posts = signal<PostResponse[]>([]);
   loading = signal(false);
+  loadingMore = signal(false);
   error = signal<string | null>(null);
+  hasMore = signal(true);
+
+  private page = 0;
+  private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
+
+  constructor() {
+    super();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          this.loadMore();
+        }
+      },
+      { rootMargin: '400px' },
+    );
+    this.destroyRef.onDestroy(() => observer.disconnect());
+
+    let observed: HTMLElement | null = null;
+    effect(() => {
+      const el = this.sentinel()?.nativeElement ?? null;
+      if (el === observed) return;
+      if (observed) observer.unobserve(observed);
+      if (el) observer.observe(el);
+      observed = el;
+    });
+  }
 
   ngOnInit(): void {
     this.loadFeed();
@@ -38,9 +78,12 @@ export class HomeComponent implements OnInit {
   loadFeed(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.postService.getFeed().subscribe({
+    this.page = 0;
+    this.hasMore.set(true);
+    this.postService.getFeed(0, PAGE_SIZE).subscribe({
       next: (page) => {
         this.posts.set(page.content);
+        this.hasMore.set(page.number + 1 < page.totalPages);
         this.loading.set(false);
       },
       error: (err) => {
@@ -50,27 +93,28 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  private loadMore(): void {
+    if (this.loading() || this.loadingMore() || !this.hasMore()) return;
+    this.loadingMore.set(true);
+    const nextPage = this.page + 1;
+    this.postService.getFeed(nextPage, PAGE_SIZE).subscribe({
+      next: (page) => {
+        this.posts.update((current) => [...current, ...page.content]);
+        this.page = page.number;
+        this.hasMore.set(page.number + 1 < page.totalPages);
+        this.loadingMore.set(false);
+      },
+      error: () => {
+        this.loadingMore.set(false);
+      },
+    });
+  }
+
   logout(): void {
     this.auth.logout();
   }
 
-  onLikeToggled(postId: number): void {
-    console.log('like toggled for post', postId);
-  }
-
-  onCommentClicked(postId: number): void {
-    console.log('comment clicked for post', postId);
-  }
-
-  onPostEdited(postId: number): void {
-    console.log('edit post', postId);
-  }
-
-  onPostDeleted(postId: number): void {
-    console.log('delete post', postId);
-  }
-
-  onPostReported(report: PostReport): void {
-    console.log('report submitted', report);
+  override onPostDeleted(postId: number): void {
+    this.posts.update((current) => current.filter((p) => p.id !== postId));
   }
 }

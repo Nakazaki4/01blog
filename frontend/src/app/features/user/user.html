@@ -12,16 +12,54 @@
       } @else {
         <div class="avatar avatar-fallback">{{ p.username[0] }}</div>
       }
+
       <div class="meta">
-        <h1 class="username">{{ p.username }}</h1>
+        <div class="meta-top">
+          <h1 class="username">{{ p.username }}</h1>
+          @if (isSelf()) {
+            <button class="pill" type="button" (click)="logout()">Log out</button>
+          } @else if (isAuthenticated()) {
+            <button class="pill pill-primary" type="button">Subscribe</button>
+          }
+        </div>
+
+        <ul class="stats" aria-label="Profile statistics">
+          <li><strong>{{ p.posts.length }}</strong> posts</li>
+          <li><strong>{{ p.subscribersCount }}</strong> subscribers</li>
+          <li><strong>{{ p.followingCount }}</strong> following</li>
+        </ul>
+
         @if (p.bio) {
           <p class="bio">{{ p.bio }}</p>
         }
       </div>
-      @if (isSelf()) {
-        <button class="pill" type="button" (click)="logout()">Log out</button>
-      }
     </header>
+
+    <section class="posts" aria-label="Posts by {{ p.username }}">
+      @if (p.posts.length === 0) {
+        <p class="status">No posts yet.</p>
+      } @else {
+        <div class="posts-grid">
+          @for (post of p.posts; track post.id) {
+            <app-post-snippet
+              [post]="post"
+              [canInteract]="isAuthenticated()"
+              [currentUserId]="currentUserId()"
+              (likeToggled)="onLikeToggled($event)"
+              (commentClicked)="onCommentClicked($event)"
+              (edited)="onPostEdited($event)"
+              (deleted)="onPostDeleted($event)"
+              (reported)="onPostReported($event)" />
+          }
+        </div>
+        @if (hasMore()) {
+          <div #sentinel></div>
+        }
+        @if (loadingMore()) {
+          <p class="status">Loading more…</p>
+        }
+      }
+    </section>
   } @else {
     <p class="status">No profile data.</p>
   }
