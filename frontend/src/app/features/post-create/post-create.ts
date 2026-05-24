@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
-  PostService,
+  PostSnippetService,
 } from '../../components/post-snippet/post-snippet.service';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
 
@@ -28,7 +28,7 @@ const MAX_CHARS = 10000;
   styleUrl: './post-create.css',
 })
 export class PostCreateComponent {
-  private postService = inject(PostService);
+  private postService = inject(PostSnippetService);
 
   postCreated = output<PostResponse>();
 

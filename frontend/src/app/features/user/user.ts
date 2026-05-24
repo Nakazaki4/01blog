@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
-import { Post } from '../../components/post-snippet/post-snippet';
+import { Post, PostResponse } from '../../components/post-snippet/post-snippet';
 import { PostHost } from '../../components/post-snippet/post-host';
-import { PostService } from '../../components/post-snippet/post-snippet.service';
+import { PostSnippetService } from '../../components/post-snippet/post-snippet.service';
 import { UserProfile, UserService } from './user.service';
 
 const PAGE_SIZE = 20;
@@ -26,11 +26,12 @@ const PAGE_SIZE = 20;
 export class UserComponent extends PostHost {
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
-  private postService = inject(PostService);
+  private postService = inject(PostSnippetService);
   private auth = inject(AuthService);
   private destroyRef = inject(DestroyRef);
 
   profile = signal<UserProfile | null>(null);
+  posts = signal<PostResponse[] | []>([])
   loading = signal(false);
   loadingMore = signal(false);
   error = signal<string | null>(null);
@@ -94,6 +95,7 @@ export class UserComponent extends PostHost {
       next: (p) => {
         this.profile.set(p);
         this.hasMore.set(p.posts.length === PAGE_SIZE);
+        this.posts.set(p.posts)
         this.loading.set(false);
       },
       error: (err) => {
@@ -114,6 +116,7 @@ export class UserComponent extends PostHost {
         const current = this.profile();
         if (current) {
           this.profile.set({ ...current, posts: [...current.posts, ...page.content] });
+          this.posts.set([...current.posts, ...page.content])
         }
         this.page = page.number;
         this.hasMore.set(page.number + 1 < page.totalPages);
@@ -133,5 +136,47 @@ export class UserComponent extends PostHost {
     const p = this.profile();
     if (!p) return;
     this.profile.set({ ...p, posts: p.posts.filter((post) => post.id !== postId) });
+  }
+
+  override onCommentCountChanged({ postId, commentCount }: { postId: number; commentCount: number }): void {
+    const p = this.profile();
+    if (!p) return;
+    const updated = p.posts.map((post) =>
+      post.id === postId ? { ...post, commentCount } : post,
+    );
+    this.profile.set({ ...p, posts: updated });
+    this.posts.set(updated);
+  }
+
+  override onLikeToggled(postId: number): void {
+    const current = this.profile()?.posts.find(p => p.id === postId);
+    if (!current) return;
+    const nextLiked = !current.isLiked;
+
+    this.posts.update(list => list.map(p =>
+      p.id === postId ? {
+        ...p,
+        isLiked: nextLiked,
+        likeCount: p.likeCount + (nextLiked ? 1 : -1)
+      }
+        : p
+    ))
+
+    const call = nextLiked ?
+      this.postService.like(postId) :
+      this.postService.unlike(postId)
+
+    call.subscribe({
+      error: () => {
+        this.posts.update(list => list.map(p =>
+          p.id === postId ? {
+            ...p,
+            isLiked: !nextLiked,
+            likeCount: p.likeCount + (nextLiked ? -1 : 1)
+          }
+            : p
+        ))
+      }
+    })
   }
 }

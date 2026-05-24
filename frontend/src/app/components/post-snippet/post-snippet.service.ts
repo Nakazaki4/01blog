@@ -15,8 +15,21 @@ export interface CreatePostRequest {
   description: string;
 }
 
+export interface CommentAuthor {
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+}
+
+export interface CommentResponse {
+  id: number;
+  author: CommentAuthor;
+  content: string;
+  createdAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
-export class PostService {
+export class PostSnippetService {
   private http = inject(HttpClient);
   private API_URL = 'http://localhost:8080/api/posts';
 
@@ -47,5 +60,30 @@ export class PostService {
 
   uploadImage(formData: FormData): Observable<{ url: string }> {
     return this.http.post<{ url: string }>(`${this.API_URL}/upload-image`, formData);
+  }
+
+  like(postId: number): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${postId}/like`, null);
+  }
+
+  unlike(postId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${postId}/like`);
+  }
+
+  listComments(postId: number, page = 0, size = 20): Observable<PageResponse<CommentResponse>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<CommentResponse>>(
+      `${this.API_URL}/${postId}/comments`,
+      { params },
+    );
+  }
+
+  addComment(postId: number, content: string): Observable<CommentResponse> {
+    return this.http.post<CommentResponse>(
+      `${this.API_URL}/${postId}/comments`,
+      { content },
+    );
   }
 }

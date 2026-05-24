@@ -1,13 +1,17 @@
+import { HttpClient } from '@angular/common/http';
 import { PostReport } from './post-snippet';
+import { inject } from '@angular/core';
 
 export abstract class PostHost {
-  onLikeToggled(postId: number): void {
-    console.log('like toggled for post', postId);
-  }
+  http = inject(HttpClient);
+
+  abstract onLikeToggled(postId: number): void;
 
   onCommentClicked(postId: number): void {
-    console.log('comment clicked for post', postId);
+    // this.http.
   }
+
+  abstract onCommentCountChanged(change: { postId: number; commentCount: number }): void;
 
   onPostEdited(postId: number): void {
     console.log('edit post', postId);

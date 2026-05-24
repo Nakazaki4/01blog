@@ -6,7 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportDialogComponent } from './report-dialog/report-dialog';
-import { PostDetailComponent, PostDetailData } from '../../features/post/post';
+import {
+  PostDetailComponent,
+  PostDetailData,
+  PostDetailResult,
+} from '../../features/post/post';
 import { stripMarkdown } from '../../shared/markdown';
 
 export interface PostAuthor {
@@ -45,6 +49,7 @@ export class Post {
 
   likeToggled = output<number>();
   commentClicked = output<number>();
+  commentCountChanged = output<{ postId: number; commentCount: number }>();
   edited = output<number>();
   deleted = output<number>();
   reported = output<PostReport>();
@@ -64,10 +69,19 @@ export class Post {
   });
 
   openDetail(): void {
-    this.dialog.open<PostDetailComponent, PostDetailData>(PostDetailComponent, {
-      data: { post: this.post() },
-      panelClass: 'post-detail-panel',
-      autoFocus: false,
+    const ref = this.dialog.open<PostDetailComponent, PostDetailData, PostDetailResult>(
+      PostDetailComponent,
+      {
+        data: { post: this.post() },
+        panelClass: 'post-detail-panel',
+        autoFocus: false,
+      },
+    );
+    ref.afterClosed().subscribe((result) => {
+      if (!result) return;
+      if (result.commentCount !== this.post().commentCount) {
+        this.commentCountChanged.emit(result);
+      }
     });
   }
 

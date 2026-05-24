@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../auth/auth.service';
-import { PostService } from '../../components/post-snippet/post-snippet.service';
+import { PostSnippetService } from '../../components/post-snippet/post-snippet.service';
 import { Post, PostResponse } from '../../components/post-snippet/post-snippet';
 import { PostHost } from '../../components/post-snippet/post-host';
 import { PostEventsService } from '../../shared/post-events.service';
@@ -26,7 +26,7 @@ const PAGE_SIZE = 20;
 })
 export class HomeComponent extends PostHost implements OnInit {
   private auth = inject(AuthService);
-  private postService = inject(PostService);
+  private postService = inject(PostSnippetService);
   private postEvents = inject(PostEventsService);
   private destroyRef = inject(DestroyRef);
 
@@ -116,5 +116,43 @@ export class HomeComponent extends PostHost implements OnInit {
 
   override onPostDeleted(postId: number): void {
     this.posts.update((current) => current.filter((p) => p.id !== postId));
+  }
+
+  override onCommentCountChanged({ postId, commentCount }: { postId: number; commentCount: number }): void {
+    this.posts.update((list) =>
+      list.map((p) => (p.id === postId ? { ...p, commentCount } : p)),
+    );
+  }
+
+  override onLikeToggled(postId: number): void {
+    const current = this.posts().find(p => p.id === postId);
+    if (!current) return;
+    const nextLiked = !current.isLiked;
+
+    this.posts.update(list => list.map(p =>
+      p.id === postId ? {
+        ...p,
+        isLiked: nextLiked,
+        likeCount: p.likeCount + (nextLiked ? 1 : -1)
+      }
+        : p
+    ))
+
+    const call = nextLiked ?
+      this.postService.like(postId) :
+      this.postService.unlike(postId)
+
+    call.subscribe({
+      error: () => {
+        this.posts.update(list => list.map(p =>
+          p.id === postId ? {
+            ...p,
+            isLiked: !nextLiked,
+            likeCount: p.likeCount + (nextLiked ? -1 : 1)
+          }
+            : p
+        ))
+      }
+    })
   }
 }
