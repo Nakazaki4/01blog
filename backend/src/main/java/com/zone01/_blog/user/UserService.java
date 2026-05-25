@@ -37,6 +37,9 @@ public class UserService {
         List<PostResponse> posts = postService.getByAuthor(userId, viewerId, 0, PROFILE_POSTS_PAGE_SIZE).getContent();
         long subscribers = subscriptionRepository.countBySubscribedToId(userId);
         long following = subscriptionRepository.countBySubscriberId(userId);
+        boolean isSubscribed = viewerId > 0
+                && !viewerId.equals(userId)
+                && subscriptionRepository.existsBySubscriberIdAndSubscribedToId(viewerId, userId);
 
         return new UserProfileResponse(
                 user.getId(),
@@ -45,7 +48,8 @@ public class UserService {
                 user.getBio(),
                 posts,
                 (int) subscribers,
-                (int) following
+                (int) following,
+                isSubscribed
         );
     }
 }

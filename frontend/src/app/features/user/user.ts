@@ -36,6 +36,7 @@ export class UserComponent extends PostHost {
   loadingMore = signal(false);
   error = signal<string | null>(null);
   hasMore = signal(false);
+  subscribePending = signal(false);
 
   private page = 0;
   private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
@@ -132,6 +133,36 @@ export class UserComponent extends PostHost {
     this.auth.logout();
   }
 
+  toggleSubscription(): void {
+    const p = this.profile();
+    if (!p || this.subscribePending()) return;
+    const nextSubscribed = !p.isSubscribed;
+    const delta = nextSubscribed ? 1 : -1;
+    this.profile.set({
+      ...p,
+      isSubscribed: nextSubscribed,
+      subscribersCount: p.subscribersCount + delta,
+    });
+    this.subscribePending.set(true);
+    const call = nextSubscribed
+      ? this.userService.subscribe(p.id)
+      : this.userService.unsubscribe(p.id);
+    call.subscribe({
+      next: () => this.subscribePending.set(false),
+      error: () => {
+        const current = this.profile();
+        if (current) {
+          this.profile.set({
+            ...current,
+            isSubscribed: !nextSubscribed,
+            subscribersCount: current.subscribersCount - delta,
+          });
+        }
+        this.subscribePending.set(false);
+      },
+    });
+  }
+
   override onPostDeleted(postId: number): void {
     const p = this.profile();
     if (!p) return;
@@ -143,6 +174,16 @@ export class UserComponent extends PostHost {
     if (!p) return;
     const updated = p.posts.map((post) =>
       post.id === postId ? { ...post, commentCount } : post,
+    );
+    this.profile.set({ ...p, posts: updated });
+    this.posts.set(updated);
+  }
+
+  override onLikeStateChanged({ postId, isLiked, likeCount }: { postId: number; isLiked: boolean; likeCount: number }): void {
+    const p = this.profile();
+    if (!p) return;
+    const updated = p.posts.map((post) =>
+      post.id === postId ? { ...post, isLiked, likeCount } : post,
     );
     this.profile.set({ ...p, posts: updated });
     this.posts.set(updated);

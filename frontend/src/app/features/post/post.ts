@@ -31,6 +31,8 @@ export interface PostDetailData {
 export interface PostDetailResult {
   postId: number;
   commentCount: number;
+  isLiked: boolean;
+  likeCount: number;
 }
 
 const MAX_COMMENT_LENGTH = 250;
@@ -69,6 +71,9 @@ export class PostDetailComponent {
   commentContent = signal<string>('');
   comments = signal<CommentResponse[]>([]);
   commentCount = signal<number>(this.post.commentCount);
+  isLiked = signal<boolean>(this.post.isLiked);
+  likeCount = signal<number>(this.post.likeCount);
+  likePending = signal<boolean>(false);
   loadingComments = signal<boolean>(false);
   loadingMore = signal<boolean>(false);
   hasMore = signal<boolean>(true);
@@ -164,10 +169,31 @@ export class PostDetailComponent {
     });
   }
 
+  onLike(): void {
+    if (!this.isAuthenticated() || this.likePending()) return;
+    const nextLiked = !this.isLiked();
+    this.isLiked.set(nextLiked);
+    this.likeCount.update((n) => n + (nextLiked ? 1 : -1));
+    this.likePending.set(true);
+    const call = nextLiked
+      ? this.postService.like(this.post.id)
+      : this.postService.unlike(this.post.id);
+    call.subscribe({
+      next: () => this.likePending.set(false),
+      error: () => {
+        this.isLiked.set(!nextLiked);
+        this.likeCount.update((n) => n + (nextLiked ? -1 : 1));
+        this.likePending.set(false);
+      },
+    });
+  }
+
   close(): void {
     this.dialogRef.close({
       postId: this.post.id,
       commentCount: this.commentCount(),
+      isLiked: this.isLiked(),
+      likeCount: this.likeCount(),
     });
   }
 }

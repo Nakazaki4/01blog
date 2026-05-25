@@ -24,10 +24,19 @@
       </div>
 
       <footer class="post-stats">
-        <span class="stat" [class.liked]="post.isLiked">
-          <mat-icon class="stat-icon" [fontIcon]="post.isLiked ? 'favorite' : 'favorite_border'" />
-          <span>{{ post.likeCount }} likes</span>
+        @if (isAuthenticated()) {
+        <button type="button" class="stat stat-button" [class.liked]="isLiked()"
+          [disabled]="likePending()"
+          (click)="$event.stopPropagation(); onLike()" [attr.aria-label]="isLiked() ? 'Unlike' : 'Like'">
+          <mat-icon class="stat-icon">{{ isLiked() ? 'favorite' : 'favorite_border' }}</mat-icon>
+          <span>{{ likeCount() }}</span>
+        </button>
+        } @else {
+        <span class="stat" [class.liked]="isLiked()">
+          <mat-icon class="stat-icon" [fontIcon]="isLiked() ? 'favorite' : 'favorite_border'" />
+          <span>{{ likeCount() }} likes</span>
         </span>
+        }
         <span class="stat">
           <mat-icon class="stat-icon" fontIcon="chat_bubble_outline" />
           <span>{{ commentCount() }} comments</span>
@@ -41,40 +50,40 @@
 
       <div class="comments-list">
         @if (loadingComments()) {
-          <div class="comments-loading">
-            <mat-spinner diameter="24" />
-          </div>
+        <div class="comments-loading">
+          <mat-spinner diameter="24" />
+        </div>
         } @else if (loadError()) {
-          <p class="comments-error">{{ loadError() }}</p>
+        <p class="comments-error">{{ loadError() }}</p>
         } @else if (comments().length === 0) {
-          <p class="comments-empty">Be the first to comment.</p>
+        <p class="comments-empty">Be the first to comment.</p>
         } @else {
-          @for (comment of comments(); track comment.id) {
-            <article class="comment">
-              @if (comment.author.avatarUrl) {
-                <div class="comment-avatar">
-                  <img [src]="comment.author.avatarUrl" [alt]="comment.author.username" />
-                </div>
-              } @else {
-                <div class="comment-avatar avatar-fallback">{{ comment.author.username[0] }}</div>
-              }
-              <div class="comment-body">
-                <div class="comment-meta">
-                  <span class="comment-username">{{ comment.author.username }}</span>
-                  <time class="comment-time">{{ comment.createdAt | date: 'short' }}</time>
-                </div>
-                <p class="comment-content">{{ comment.content }}</p>
-              </div>
-            </article>
+        @for (comment of comments(); track comment.id) {
+        <article class="comment">
+          @if (comment.author.avatarUrl) {
+          <div class="comment-avatar">
+            <img [src]="comment.author.avatarUrl" [alt]="comment.author.username" />
+          </div>
+          } @else {
+          <div class="comment-avatar avatar-fallback">{{ comment.author.username[0] }}</div>
           }
-          @if (hasMore()) {
-            <div #sentinel class="comments-sentinel"></div>
-          }
-          @if (loadingMore()) {
-            <div class="comments-loading">
-              <mat-spinner diameter="20" />
+          <div class="comment-body">
+            <div class="comment-meta">
+              <span class="comment-username">{{ comment.author.username }}</span>
+              <time class="comment-time">{{ comment.createdAt | date: 'short' }}</time>
             </div>
-          }
+            <p class="comment-content">{{ comment.content }}</p>
+          </div>
+        </article>
+        }
+        @if (hasMore()) {
+        <div #sentinel class="comments-sentinel"></div>
+        }
+        @if (loadingMore()) {
+        <div class="comments-loading">
+          <mat-spinner diameter="20" />
+        </div>
+        }
         }
       </div>
 
@@ -82,22 +91,10 @@
       <form class="comment-form" (ngSubmit)="submitComment()">
         <mat-form-field appearance="outline" class="comment-field">
           <mat-label>Write a comment…</mat-label>
-          <input
-            matInput
-            type="text"
-            name="comment"
-            [maxlength]="maxLength"
-            [ngModel]="commentContent()"
-            (ngModelChange)="commentContent.set($event)"
-            [disabled]="submitting()"
-          />
+          <input matInput type="text" name="comment" [maxlength]="maxLength" [ngModel]="commentContent()"
+            (ngModelChange)="commentContent.set($event)" [disabled]="submitting()" />
         </mat-form-field>
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="!canSubmit()"
-        >
+        <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit()">
           Post
         </button>
       </form>

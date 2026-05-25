@@ -124,6 +124,12 @@ export class HomeComponent extends PostHost implements OnInit {
     );
   }
 
+  override onLikeStateChanged({ postId, isLiked, likeCount }: { postId: number; isLiked: boolean; likeCount: number }): void {
+    this.posts.update((list) =>
+      list.map((p) => (p.id === postId ? { ...p, isLiked, likeCount } : p)),
+    );
+  }
+
   override onLikeToggled(postId: number): void {
     const current = this.posts().find(p => p.id === postId);
     if (!current) return;

@@ -38,3 +38,117 @@
 .nav-icon:hover {
   color: var(--electric-violet);
 }
+
+::ng-deep .notif-menu .mat-mdc-menu-content {
+  padding: 0;
+  width: 22rem;
+  max-width: 90vw;
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--gray-400) 20%, transparent);
+}
+
+.notif-title {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.notif-mark-all {
+  background: none;
+  border: 0;
+  color: var(--electric-violet);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.notif-mark-all:hover {
+  background: color-mix(in srgb, var(--electric-violet) 10%, transparent);
+}
+
+.notif-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0;
+}
+
+.notif-empty {
+  margin: 0;
+  padding: 1rem;
+  color: var(--gray-400);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.notif-list {
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  border-bottom: 1px solid color-mix(in srgb, var(--gray-400) 12%, transparent);
+}
+
+.notif-item:hover {
+  background: color-mix(in srgb, var(--electric-violet) 6%, transparent);
+}
+
+.notif-item.unread {
+  background: color-mix(in srgb, var(--electric-violet) 4%, transparent);
+}
+
+.notif-icon {
+  color: var(--electric-violet);
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--gray-900);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.notif-time {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.notif-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--hot-red);
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}

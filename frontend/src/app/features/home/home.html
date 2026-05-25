@@ -22,6 +22,7 @@
           [canInteract]="isAuthenticated()"
           [currentUserId]="currentUserId()"
           (likeToggled)="onLikeToggled($event)"
+          (likeStateChanged)="onLikeStateChanged($event)"
           (commentClicked)="onCommentClicked($event)"
           (commentCountChanged)="onCommentCountChanged($event)"
           (edited)="onPostEdited($event)"

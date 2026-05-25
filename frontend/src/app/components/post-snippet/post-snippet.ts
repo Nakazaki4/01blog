@@ -48,6 +48,7 @@ export class Post {
   currentUserId = input<number | null>(null);
 
   likeToggled = output<number>();
+  likeStateChanged = output<{ postId: number; isLiked: boolean; likeCount: number }>();
   commentClicked = output<number>();
   commentCountChanged = output<{ postId: number; commentCount: number }>();
   edited = output<number>();
@@ -79,8 +80,19 @@ export class Post {
     );
     ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      if (result.commentCount !== this.post().commentCount) {
-        this.commentCountChanged.emit(result);
+      const current = this.post();
+      if (result.commentCount !== current.commentCount) {
+        this.commentCountChanged.emit({
+          postId: result.postId,
+          commentCount: result.commentCount,
+        });
+      }
+      if (result.isLiked !== current.isLiked || result.likeCount !== current.likeCount) {
+        this.likeStateChanged.emit({
+          postId: result.postId,
+          isLiked: result.isLiked,
+          likeCount: result.likeCount,
+        });
       }
     });
   }

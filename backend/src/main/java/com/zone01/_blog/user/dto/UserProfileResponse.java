@@ -11,5 +11,6 @@ public record UserProfileResponse(
         String bio,
         List<PostResponse> posts,
         int subscribersCount,
-        int followingCount) {
+        int followingCount,
+        boolean isSubscribed) {
 }

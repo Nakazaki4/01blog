@@ -7,6 +7,8 @@ export abstract class PostHost {
 
   abstract onLikeToggled(postId: number): void;
 
+  abstract onLikeStateChanged(change: { postId: number; isLiked: boolean; likeCount: number }): void;
+
   onCommentClicked(postId: number): void {
     // this.http.
   }

@@ -141,6 +141,45 @@
   gap: 0.5rem;
 }
 
+.stat-button {
+  background: none;
+  border: 0;
+  padding: 0.25rem 0.5rem;
+  margin: -0.25rem -0.5rem;
+  border-radius: 0.5rem;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.stat-button:hover {
+  background: color-mix(in srgb, var(--bright-blue) 8%, transparent);
+  color: var(--bright-blue);
+}
+
+.stat-button.liked:hover {
+  background: color-mix(in srgb, var(--hot-red) 10%, transparent);
+  color: var(--hot-red);
+}
+
+.stat-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.stat-button:disabled:hover {
+  background: none;
+  color: inherit;
+}
+
+.stat-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  line-height: 1;
+}
+
 .stat.liked {
   color: var(--hot-red);
 }

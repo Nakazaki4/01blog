@@ -11,6 +11,7 @@ export interface UserProfile {
   posts: PostResponse[];
   subscribersCount: number;
   followingCount: number;
+  isSubscribed: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -20,5 +21,13 @@ export class UserService {
 
   getById(id: number | string): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.API_URL}/${id}`);
+  }
+
+  subscribe(id: number | string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${id}/subscribe`, null);
+  }
+
+  unsubscribe(id: number | string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}/subscribe`);
   }
 }

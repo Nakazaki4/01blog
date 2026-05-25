@@ -2,11 +2,9 @@ package com.zone01._blog.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zone01._blog.user.dto.UserProfileResponse;
@@ -40,16 +38,6 @@ public class UserController {
 
     @GetMapping("/api/users/{user_id}/subscriptions?page={page_number}")
     public ResponseEntity subscriptions(@PathVariable String user_id, @PathVariable String page_number) {
-        return null;
-    }
-
-    @PostMapping("/api/users/{user_id}/subscribe")
-    public ResponseEntity subscribe(@PathVariable String user_id) {
-        return null;
-    }
-
-    @DeleteMapping("/api/users/{user_id}/subscribe")
-    public ResponseEntity unsubscribe(@PathVariable String user_id) {
         return null;
     }
 
