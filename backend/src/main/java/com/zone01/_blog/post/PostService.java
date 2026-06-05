@@ -1,5 +1,6 @@
 package com.zone01._blog.post;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,8 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.media.MediaService;
+import com.zone01._blog.notification.Notification;
+import com.zone01._blog.notification.NotificationRepository;
+import com.zone01._blog.notification.NotificationType;
 import com.zone01._blog.post.dto.PostResponse;
 import com.zone01._blog.post.dto.UserPost;
+import com.zone01._blog.subscription.SubscriptionRepository;
 import com.zone01._blog.user.User;
 import com.zone01._blog.user.UserRepository;
 
@@ -27,11 +32,16 @@ public class PostService {
     private final PostRepository postRepo;
     private final UserRepository userRepo;
     private final MediaService mediaService;
+    private final NotificationRepository notificationRepo;
+    private final SubscriptionRepository subscriptionRepo;
 
-    public PostService(PostRepository postRepo, UserRepository userRepo, MediaService mediaService) {
+    public PostService(PostRepository postRepo, UserRepository userRepo, MediaService mediaService,
+            NotificationRepository notifRepo, SubscriptionRepository subscriptionRepo) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.mediaService = mediaService;
+        this.notificationRepo = notifRepo;
+        this.subscriptionRepo = subscriptionRepo;
     }
 
     public Page<PostResponse> getFeed(Long userId, int page, int size) {
@@ -77,6 +87,14 @@ public class PostService {
         post.setDescription(description);
         Post saved = postRepo.save(post);
 
+        // notify all subscribers
+        List<User> subscribers = subscriptionRepo.findFollowersByFollowedId(authorId);
+        List<Notification> notifications = subscribers.stream()
+                .map(subscriber -> createNotification(post, subscriber))
+                .toList();
+
+        notificationRepo.saveAll(notifications);
+
         return new PostResponse(
                 saved.getId(),
                 new UserPost(author.getId(), author.getUsername(), author.getAvatarUrl()),
@@ -86,6 +104,18 @@ public class PostService {
                 false,
                 saved.getCreatedAt()
         );
+    }
+
+    public Notification createNotification(Post post, User recipient) {
+        Notification n = new Notification();
+        n.setRecipient(recipient);
+        n.setActor(post.getUser());
+        n.setCreatedAt(Instant.now());
+        n.setRead(false);
+        n.setPost(post);
+        n.setType(NotificationType.NEW_POST);
+
+        return n;
     }
 
     public PostResponse update(Long postId, Long requesterId, String description) {
@@ -136,7 +166,9 @@ public class PostService {
 
     private List<String> extractImageUrls(String markdown) {
         List<String> urls = new ArrayList<>();
-        if (markdown == null) return urls;
+        if (markdown == null) {
+            return urls;
+        }
         Matcher m = MARKDOWN_IMAGE.matcher(markdown);
         while (m.find()) {
             urls.add(m.group(1));

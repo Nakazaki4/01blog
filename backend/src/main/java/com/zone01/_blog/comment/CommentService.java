@@ -1,5 +1,7 @@
 package com.zone01._blog.comment;
 
+import java.time.Instant;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -7,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.comment.dto.CommentResponse;
+import com.zone01._blog.notification.Notification;
+import com.zone01._blog.notification.NotificationRepository;
+import com.zone01._blog.notification.NotificationType;
 import com.zone01._blog.post.Post;
 import com.zone01._blog.post.PostRepository;
 import com.zone01._blog.post.dto.UserPost;
@@ -19,13 +24,16 @@ public class CommentService {
     private final CommentRepository commentRepo;
     private final PostRepository postRepo;
     private final UserRepository userRepo;
+    private final NotificationRepository notificationRepo;
     private static final int MAX_CONTENT_LENGTH = 250;
     private static final int MIN_CONTENT_LENGTH = 12;
 
-    public CommentService(CommentRepository commentRepository, PostRepository postRepo, UserRepository userRepo) {
+    public CommentService(CommentRepository commentRepository, PostRepository postRepo,
+            UserRepository userRepo, NotificationRepository notifRepo) {
         this.commentRepo = commentRepository;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
+        this.notificationRepo = notifRepo;
     }
 
     public CommentResponse addComment(Long postId, Long userId, String content) {
@@ -57,7 +65,25 @@ public class CommentService {
         comment.setUser(author);
         Comment saved = this.commentRepo.save(comment);
 
+        User postAuthor = userRepo.findByPostId(postId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post owner not found")
+        );
+        Notification n = createNotification(post, postAuthor);
+        notificationRepo.save(n);
+
         return toResponse(saved);
+    }
+
+    public Notification createNotification(Post post, User recipient) {
+        Notification n = new Notification();
+        n.setRecipient(recipient);
+        n.setActor(post.getUser());
+        n.setCreatedAt(Instant.now());
+        n.setRead(false);
+        n.setPost(post);
+        n.setType(NotificationType.NEW_COMMENT);
+
+        return n;
     }
 
     public Page<CommentResponse> listForPost(Long postId, int page, int size) {

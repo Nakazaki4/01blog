@@ -1,7 +1,12 @@
 package com.zone01._blog.notification;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.zone01._blog.post.Post;
 import com.zone01._blog.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,17 +18,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.Instant;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"actor_id", "recipient_id", "type", "post_id"})
+})
 @Getter
 @Setter
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
