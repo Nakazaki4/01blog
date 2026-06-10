@@ -20,19 +20,21 @@ public class LikeController {
     }
 
     private static Long parseViewerId(String principal) {
-        if (principal == null || "anonymousUser".equals(principal)) return -1L;
+        if (principal == null || "anonymousUser".equals(principal)) {
+            return -1L;
+        }
         return Long.parseLong(principal);
     }
 
-    @PostMapping("/posts/{id}/like")
-    public ResponseEntity<Void> likePost(@AuthenticationPrincipal String userId, @PathVariable Long id) {
-        likeService.addLike(parseViewerId(userId), id);
+    @PostMapping("/posts/{post_id}/like")
+    public ResponseEntity<Void> likePost(@AuthenticationPrincipal String userId, @PathVariable Long post_id) {
+        likeService.addLike(post_id, parseViewerId(userId));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/posts/{id}/like")
-    public ResponseEntity<Void> unlikePost(@AuthenticationPrincipal String userId, @PathVariable Long id) {
-        likeService.removeLike(parseViewerId(userId), id);
+    @DeleteMapping("/posts/{post_id}/like")
+    public ResponseEntity<Void> unlikePost(@AuthenticationPrincipal String userId, @PathVariable Long post_id) {
+        likeService.removeLike(post_id, parseViewerId(userId));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

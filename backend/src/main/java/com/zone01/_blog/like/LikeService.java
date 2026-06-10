@@ -34,7 +34,7 @@ public class LikeService {
     }
 
     @Transactional
-    public void addLike(Long userId, Long postId) {
+    public void addLike(Long postId, Long userId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 

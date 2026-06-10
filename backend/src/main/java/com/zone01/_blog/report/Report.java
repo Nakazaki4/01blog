@@ -1,6 +1,11 @@
 package com.zone01._blog.report;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.zone01._blog.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,12 +17,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.Instant;
+import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "reports")
+@Table(
+    name = "reports",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"reported_user_id", "reporter_id", "status"}
+    )
+)
+@Getter
+@Setter
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

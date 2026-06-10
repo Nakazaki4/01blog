@@ -116,7 +116,13 @@ export class Post {
   }
 
   onReport(): void {
-    const ref = this.dialog.open<ReportDialogComponent, void, string>(ReportDialogComponent);
+    const ref = this.dialog.open<ReportDialogComponent, { postId: number }, string>(ReportDialogComponent,
+      {
+        data: {
+          postId: this.post().id
+        }
+      }
+    );
     ref.afterClosed().subscribe((reason) => {
       if (!reason) return;
       this.reported.emit({ postId: this.post().id, reason });
