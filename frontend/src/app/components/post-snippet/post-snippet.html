@@ -2,65 +2,51 @@
 
 <article class="post-card" (click)="openDetail()" role="link" tabindex="0">
   <header class="post-header">
-    <a
-      [routerLink]="['/profile', p.author.id]"
-      (click)="$event.stopPropagation()"
-      class="author-link avatar-link"
+    <a [routerLink]="['/profile', p.author.id]" (click)="$event.stopPropagation()" class="author-link avatar-link"
       [attr.aria-label]="'View ' + p.author.username + '\'s profile'">
       @if (p.author.avatarUrl) {
-        <div class="avatar">
-          <img [src]="p.author.avatarUrl" [alt]="p.author.username" />
-        </div>
+      <div class="avatar">
+        <img [src]="p.author.avatarUrl" [alt]="p.author.username" />
+      </div>
       } @else {
-        <div class="avatar avatar-fallback">{{ p.author.username[0] }}</div>
+      <div class="avatar avatar-fallback">{{ p.author.username[0] }}</div>
       }
     </a>
     <div class="author-meta">
-      <a
-        [routerLink]="['/profile', p.author.id]"
-        (click)="$event.stopPropagation()"
-        class="author-link username">
+      <a [routerLink]="['/profile', p.author.id]" (click)="$event.stopPropagation()" class="author-link username">
         {{ p.author.username }}
       </a>
       <time class="created-at">{{ p.createdAt | date: 'medium' }}</time>
     </div>
 
     @if (isOwner()) {
-      <button
-        mat-icon-button
-        type="button"
-        class="post-menu-trigger"
-        [matMenuTriggerFor]="postMenu"
-        (click)="$event.stopPropagation()"
-        aria-label="Post settings">
-        <mat-icon>more_vert</mat-icon>
+    <button mat-icon-button type="button" class="post-menu-trigger" [matMenuTriggerFor]="postMenu"
+      (click)="$event.stopPropagation()" aria-label="Post settings">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #postMenu="matMenu">
+      <button mat-menu-item (click)="onEdit()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
       </button>
-      <mat-menu #postMenu="matMenu">
-        <button mat-menu-item (click)="onEdit()">
-          <mat-icon>edit</mat-icon>
-          <span>Edit</span>
-        </button>
-        <button mat-menu-item (click)="onDelete()">
-          <mat-icon>delete</mat-icon>
-          <span>Delete</span>
-        </button>
-      </mat-menu>
+      @if(isAdmin() || isOwner()) {
+      <button mat-menu-item (click)="onDelete()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+      }
+    </mat-menu>
     } @else {
-       <button
-        mat-icon-button
-        type="button"
-        class="post-menu-trigger"
-        [matMenuTriggerFor]="postMenu"
-        (click)="$event.stopPropagation()"
-        aria-label="Post settings">
-        <mat-icon>more_vert</mat-icon>
+    <button mat-icon-button type="button" class="post-menu-trigger" [matMenuTriggerFor]="postMenu"
+      (click)="$event.stopPropagation()" aria-label="Post settings">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #postMenu="matMenu">
+      <button mat-menu-item (click)="onReport()">
+        <mat-icon>report</mat-icon>
+        <span>Report</span>
       </button>
-      <mat-menu #postMenu="matMenu">
-        <button mat-menu-item (click)="onReport()">
-          <mat-icon>report</mat-icon>
-          <span>Report</span>
-        </button>
-      </mat-menu>
+    </mat-menu>
     }
 
   </header>
@@ -69,32 +55,25 @@
 
   <footer class="post-stats">
     @if (canInteract()) {
-      <button
-        type="button"
-        class="stat stat-button"
-        [class.liked]="p.isLiked"
-        (click)="$event.stopPropagation(); onLike()"
-        [attr.aria-label]="p.isLiked ? 'Unlike' : 'Like'">
-        <mat-icon class="stat-icon">{{ p.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
-        <span>{{ p.likeCount }}</span>
-      </button>
-      <button
-        type="button"
-        class="stat stat-button"
-        (click)="$event.stopPropagation(); openDetail()"
-        aria-label="Comments">
-        <mat-icon class="stat-icon">chat_bubble_outline</mat-icon>
-        <span>{{ p.commentCount }}</span>
-      </button>
+    <button type="button" class="stat stat-button" [class.liked]="p.isLiked"
+      (click)="$event.stopPropagation(); onLike()" [attr.aria-label]="p.isLiked ? 'Unlike' : 'Like'">
+      <mat-icon class="stat-icon">{{ p.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ p.likeCount }}</span>
+    </button>
+    <button type="button" class="stat stat-button" (click)="$event.stopPropagation(); openDetail()"
+      aria-label="Comments">
+      <mat-icon class="stat-icon">chat_bubble_outline</mat-icon>
+      <span>{{ p.commentCount }}</span>
+    </button>
     } @else {
-      <span class="stat" [class.liked]="p.isLiked">
-        <mat-icon class="stat-icon">{{ p.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
-        <span>{{ p.likeCount }}</span>
-      </span>
-      <span class="stat">
-        <mat-icon class="stat-icon">chat_bubble_outline</mat-icon>
-        <span>{{ p.commentCount }}</span>
-      </span>
+    <span class="stat" [class.liked]="p.isLiked">
+      <mat-icon class="stat-icon">{{ p.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ p.likeCount }}</span>
+    </span>
+    <span class="stat">
+      <mat-icon class="stat-icon">chat_bubble_outline</mat-icon>
+      <span>{{ p.commentCount }}</span>
+    </span>
     }
   </footer>
 </article>

@@ -91,4 +91,13 @@ public class AdminService {
         reportRepo.updateStatus(reportId, newStatus.name());
         return newStatus;
     }
+
+    public void deletePost(Long postId) {
+        try {
+            postRepo.deleteById(postId);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown error occurred");
+        }
+    }
+
 }

@@ -62,6 +62,10 @@ export class Post {
     return uid != null && uid === this.post().author.id;
   });
 
+  isAdmin = computed(() => {
+    
+  })
+
   snippet = computed(() => {
     const stripped = stripMarkdown(this.post().description ?? '');
     return stripped.length > SNIPPET_LENGTH

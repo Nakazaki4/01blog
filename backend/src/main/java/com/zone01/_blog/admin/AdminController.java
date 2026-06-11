@@ -54,8 +54,7 @@ public class AdminController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<List<Report>> listAllReports(@AuthenticationPrincipal String userId,
-                                                       @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<List<Report>> listAllReports(@RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "20") int size,
                                                        @RequestParam(defaultValue = "PENDING") String status
     ) {
@@ -76,7 +75,7 @@ public class AdminController {
 
     @PostMapping("/users/{id}/ban")
     public ResponseEntity<Void> banUser(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
-        if (parseId(adminId).equals(id)){
+        if (parseId(adminId).equals(id)) {
             return ResponseEntity.badRequest().build();
         }
         adminService.switchBanState(id, true);
@@ -84,14 +83,26 @@ public class AdminController {
     }
 
     @PostMapping("/users/{id}/unban")
-    public ResponseEntity<Void> unbanUser(@PathVariable Long id) {
+    public ResponseEntity<Void> unbanUser(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
+        if (parseId(adminId).equals(id)) {
+            return ResponseEntity.badRequest().build();
+        }
         adminService.switchBanState(id, false);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
+        if (parseId(adminId).equals(id)) {
+            return ResponseEntity.badRequest().build();
+        }
         adminService.deleteUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> deletePost(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
+        adminService.deletePost(id);
         return ResponseEntity.ok().build();
     }
 
