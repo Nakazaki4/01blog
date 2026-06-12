@@ -22,4 +22,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     int markAllAsRead(@Param("recipientId") Long recipientId);
 
     boolean existsByActorIdAndRecipientIdAndType(Long actorId, Long recipientId, NotificationType type);
+
+    boolean existsByActorIdAndRecipientIdAndTypeAndPostId(
+            Long actorId,
+            Long recipientId,
+            NotificationType type,
+            Long postId
+    );
 }

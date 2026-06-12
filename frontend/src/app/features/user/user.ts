@@ -32,6 +32,7 @@ export class UserComponent extends PostHost {
 
   profile = signal<UserProfile | null>(null);
   posts = signal<PostResponse[] | []>([])
+  likePendingIds = signal<ReadonlySet<number>>(new Set());
   loading = signal(false);
   loadingMore = signal(false);
   error = signal<string | null>(null);
@@ -53,6 +54,8 @@ export class UserComponent extends PostHost {
   });
 
   isAuthenticated = computed(() => this.auth.currentUser() != null);
+  
+  isAdmin = computed(() => this.auth.isAdmin());
 
   constructor() {
     super();
@@ -166,7 +169,9 @@ export class UserComponent extends PostHost {
   override onPostDeleted(postId: number): void {
     const p = this.profile();
     if (!p) return;
-    this.profile.set({ ...p, posts: p.posts.filter((post) => post.id !== postId) });
+    const posts = p.posts.filter((post) => post.id !== postId);
+    this.profile.set({ ...p, posts });
+    this.posts.set(posts);
   }
 
   override onCommentCountChanged({ postId, commentCount }: { postId: number; commentCount: number }): void {
@@ -190,34 +195,54 @@ export class UserComponent extends PostHost {
   }
 
   override onLikeToggled(postId: number): void {
+    if (this.likePendingIds().has(postId)) return;
     const current = this.profile()?.posts.find(p => p.id === postId);
     if (!current) return;
     const nextLiked = !current.isLiked;
+    const nextLikeCount = current.likeCount + (nextLiked ? 1 : -1);
 
-    this.posts.update(list => list.map(p =>
-      p.id === postId ? {
-        ...p,
-        isLiked: nextLiked,
-        likeCount: p.likeCount + (nextLiked ? 1 : -1)
-      }
-        : p
-    ))
+    this.updatePost(postId, { isLiked: nextLiked, likeCount: nextLikeCount });
+    this.setLikePending(postId, true);
 
     const call = nextLiked ?
       this.postService.like(postId) :
       this.postService.unlike(postId)
 
     call.subscribe({
+      next: () => this.setLikePending(postId, false),
       error: () => {
-        this.posts.update(list => list.map(p =>
-          p.id === postId ? {
-            ...p,
-            isLiked: !nextLiked,
-            likeCount: p.likeCount + (nextLiked ? -1 : 1)
-          }
-            : p
-        ))
+        this.updatePost(postId, {
+          isLiked: current.isLiked,
+          likeCount: current.likeCount,
+        });
+        this.setLikePending(postId, false);
       }
     })
+  }
+
+  isLikePending(postId: number): boolean {
+    return this.likePendingIds().has(postId);
+  }
+
+  private updatePost(postId: number, changes: Partial<PostResponse>): void {
+    const current = this.profile();
+    if (!current) return;
+    const posts = current.posts.map((post) =>
+      post.id === postId ? { ...post, ...changes } : post,
+    );
+    this.profile.set({ ...current, posts });
+    this.posts.set(posts);
+  }
+
+  private setLikePending(postId: number, pending: boolean): void {
+    this.likePendingIds.update((ids) => {
+      const next = new Set(ids);
+      if (pending) {
+        next.add(postId);
+      } else {
+        next.delete(postId);
+      }
+      return next;
+    });
   }
 }

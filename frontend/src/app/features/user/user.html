@@ -48,10 +48,12 @@
       } @else {
         <div class="posts-grid">
           @for (post of p.posts; track post.id) {
-            <app-post-snippet
+            <post-snippet
               [post]="post"
+              [isAdmin]="isAdmin()"
               [canInteract]="isAuthenticated()"
               [currentUserId]="currentUserId()"
+              [likePending]="isLikePending(post.id)"
               (likeToggled)="onLikeToggled($event)"
               (likeStateChanged)="onLikeStateChanged($event)"
               (commentClicked)="onCommentClicked($event)"

@@ -1,4 +1,105 @@
 <section class="admin-page">
-  <h1>Manage <span class="gradient-text">Users</span></h1>
-  <p>List, ban, or unban users.</p>
+  <header class="admin-header">
+    <div>
+      <h1>Manage <span class="gradient-text">Users</span></h1>
+      <p>List, ban, unban, or remove users.</p>
+    </div>
+
+    <div class="toolbar">
+      <label class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="search"
+          placeholder="Search username or email"
+          [value]="search()"
+          (input)="onSearchInput($event)"
+          (keyup.enter)="applySearch()" />
+      </label>
+      <button mat-stroked-button type="button" (click)="applySearch()">Search</button>
+      @if (search()) {
+        <button mat-icon-button type="button" aria-label="Clear search" (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner diameter="34" />
+    </div>
+  } @else if (error()) {
+    <div class="state error-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="loadUsers()">Retry</button>
+    </div>
+  } @else if (users().length === 0) {
+    <div class="state">
+      <mat-icon>group_off</mat-icon>
+      <p>No users found.</p>
+    </div>
+  } @else {
+    <div class="table-shell">
+      <div class="table-head users-head">
+        <span>User</span>
+        <span>Role</span>
+        <span>Posts</span>
+        <span>Reports</span>
+        <span>Actions</span>
+      </div>
+
+      @for (user of users(); track user.id) {
+        <article class="table-row users-row">
+          <div class="primary-cell">
+            <strong>{{ user.username }}</strong>
+            <span>{{ user.email }}</span>
+            <time>{{ user.createdAt | date: 'mediumDate' }}</time>
+          </div>
+          <span class="status" [class.warn]="user.banned">
+            {{ user.banned ? 'Banned' : user.role }}
+          </span>
+          <span>{{ user.postCount ?? 0 }}</span>
+          <span>{{ user.reportCount ?? 0 }}</span>
+          <div class="row-actions">
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="isActionPending(user.id)"
+              (click)="toggleBan(user)">
+              <mat-icon>{{ user.banned ? 'lock_open' : 'block' }}</mat-icon>
+              {{ user.banned ? 'Unban' : 'Ban' }}
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              aria-label="Delete user"
+              [disabled]="isActionPending(user.id)"
+              (click)="deleteUser(user)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+
+    <footer class="pager">
+      <span>Page {{ page() + 1 }} of {{ totalPages() }} · {{ totalElements() }} users</span>
+      <div>
+        <button mat-stroked-button type="button" [disabled]="page() === 0" (click)="previousPage()">
+          <mat-icon>chevron_left</mat-icon>
+          Previous
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="page() + 1 >= totalPages()"
+          (click)="nextPage()">
+          Next
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </footer>
+  }
 </section>

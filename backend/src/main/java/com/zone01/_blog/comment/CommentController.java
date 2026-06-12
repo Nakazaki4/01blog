@@ -38,7 +38,7 @@ public class CommentController {
             return ResponseEntity.badRequest().body("Size must be between 1 and " + MAX_COMMENTS);
         }
         Page<CommentResponse> result = commentService.listForPost(id, page, size);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(result.toList());
     }
 
     @PostMapping("/posts/{id}/comments")

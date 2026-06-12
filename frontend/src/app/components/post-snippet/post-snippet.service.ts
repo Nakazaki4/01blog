@@ -3,14 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PostResponse } from './post-snippet';
 
-export interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
-
 export interface CreatePostRequest {
   description: string;
 }
@@ -33,18 +25,18 @@ export class PostSnippetService {
   private http = inject(HttpClient);
   private API_URL = 'http://localhost:8080/api/posts';
 
-  getFeed(page = 0, size = 20): Observable<PageResponse<PostResponse>> {
+  getFeed(page = 0, size = 20): Observable<PostResponse[]> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
-    return this.http.get<PageResponse<PostResponse>>(`${this.API_URL}/feed`, { params });
+    return this.http.get<PostResponse[]>(`${this.API_URL}/feed`, { params });
   }
 
-  getByAuthor(userId: number | string, page = 0, size = 20): Observable<PageResponse<PostResponse>> {
+  getByAuthor(userId: number | string, page = 0, size = 20): Observable<PostResponse[]> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
-    return this.http.get<PageResponse<PostResponse>>(
+    return this.http.get<PostResponse[]>(
       `http://localhost:8080/api/users/${userId}/posts`,
       { params },
     );
@@ -70,11 +62,11 @@ export class PostSnippetService {
     return this.http.delete<void>(`${this.API_URL}/${postId}/like`);
   }
 
-  listComments(postId: number, page = 0, size = 20): Observable<PageResponse<CommentResponse>> {
+  listComments(postId: number, page = 0, size = 20): Observable<CommentResponse[]> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
-    return this.http.get<PageResponse<CommentResponse>>(
+    return this.http.get<CommentResponse[]>(
       `${this.API_URL}/${postId}/comments`,
       { params },
     );

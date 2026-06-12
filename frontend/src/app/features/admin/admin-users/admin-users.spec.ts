@@ -1,17 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
-import { AdminUsers } from './admin-users';
+import { AdminUsersComponent } from './admin-users';
 
 describe('AdminUsers', () => {
-  let component: AdminUsers;
-  let fixture: ComponentFixture<AdminUsers>;
+  let component: AdminUsersComponent;
+  let fixture: ComponentFixture<AdminUsersComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminUsers],
+      imports: [AdminUsersComponent],
+      providers: [provideHttpClient()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminUsers);
+    fixture = TestBed.createComponent(AdminUsersComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

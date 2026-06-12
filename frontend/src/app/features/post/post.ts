@@ -122,9 +122,9 @@ export class PostDetailComponent {
     this.hasMore.set(true);
     this.postService.listComments(this.post.id, 0, PAGE_SIZE).subscribe({
       next: (page) => {
-        this.comments.set(page.content);
-        this.commentCount.set(page.totalElements);
-        this.hasMore.set(page.number + 1 < page.totalPages);
+        this.comments.set(page);
+        this.commentCount.set(page.length);
+        this.hasMore.set(page.length + 1 < page.length);
         this.loadingComments.set(false);
       },
       error: (err) => {
@@ -140,9 +140,9 @@ export class PostDetailComponent {
     const nextPage = this.page + 1;
     this.postService.listComments(this.post.id, nextPage, PAGE_SIZE).subscribe({
       next: (page) => {
-        this.comments.update((list) => [...list, ...page.content]);
-        this.commentCount.set(page.totalElements);
-        this.page = page.number;
+        this.comments.update((list) => [...list, ...page]);
+        this.commentCount.set(page.length);
+        this.page = page.length;
         this.hasMore.set(page.number + 1 < page.totalPages);
         this.loadingMore.set(false);
       },

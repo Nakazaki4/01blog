@@ -38,6 +38,7 @@ export class HomeComponent extends PostHost implements OnInit {
   });
 
   posts = signal<PostResponse[]>([]);
+  likePendingIds = signal<ReadonlySet<number>>(new Set());
   loading = signal(false);
   loadingMore = signal(false);
   error = signal<string | null>(null);
@@ -45,6 +46,8 @@ export class HomeComponent extends PostHost implements OnInit {
 
   private page = 0;
   private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
+
+  isAdmin = computed(() => this.auth.isAdmin());
 
   constructor() {
     super();
@@ -82,8 +85,8 @@ export class HomeComponent extends PostHost implements OnInit {
     this.hasMore.set(true);
     this.postService.getFeed(0, PAGE_SIZE).subscribe({
       next: (page) => {
-        this.posts.set(page.content);
-        this.hasMore.set(page.number + 1 < page.totalPages);
+        this.posts.set(page);
+        this.hasMore.set(page.length + 1 < page.length);
         this.loading.set(false);
       },
       error: (err) => {
@@ -99,9 +102,9 @@ export class HomeComponent extends PostHost implements OnInit {
     const nextPage = this.page + 1;
     this.postService.getFeed(nextPage, PAGE_SIZE).subscribe({
       next: (page) => {
-        this.posts.update((current) => [...current, ...page.content]);
-        this.page = page.number;
-        this.hasMore.set(page.number + 1 < page.totalPages);
+        this.posts.update((current) => [...current, ...page]);
+        this.page = page.length;
+        this.hasMore.set(page.length + 1 < page.length);
         this.loadingMore.set(false);
       },
       error: () => {
@@ -131,34 +134,55 @@ export class HomeComponent extends PostHost implements OnInit {
   }
 
   override onLikeToggled(postId: number): void {
+    if (this.likePendingIds().has(postId)) return;
     const current = this.posts().find(p => p.id === postId);
     if (!current) return;
     const nextLiked = !current.isLiked;
+    const nextLikeCount = current.likeCount + (nextLiked ? 1 : -1);
 
     this.posts.update(list => list.map(p =>
       p.id === postId ? {
         ...p,
         isLiked: nextLiked,
-        likeCount: p.likeCount + (nextLiked ? 1 : -1)
+        likeCount: nextLikeCount
       }
         : p
     ))
+    this.setLikePending(postId, true);
 
     const call = nextLiked ?
       this.postService.like(postId) :
       this.postService.unlike(postId)
 
     call.subscribe({
+      next: () => this.setLikePending(postId, false),
       error: () => {
         this.posts.update(list => list.map(p =>
           p.id === postId ? {
             ...p,
-            isLiked: !nextLiked,
-            likeCount: p.likeCount + (nextLiked ? -1 : 1)
+            isLiked: current.isLiked,
+            likeCount: current.likeCount
           }
             : p
         ))
+        this.setLikePending(postId, false);
       }
     })
+  }
+
+  isLikePending(postId: number): boolean {
+    return this.likePendingIds().has(postId);
+  }
+
+  private setLikePending(postId: number, pending: boolean): void {
+    this.likePendingIds.update((ids) => {
+      const next = new Set(ids);
+      if (pending) {
+        next.add(postId);
+      } else {
+        next.delete(postId);
+      }
+      return next;
+    });
   }
 }

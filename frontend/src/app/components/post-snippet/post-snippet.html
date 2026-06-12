@@ -19,33 +19,30 @@
       <time class="created-at">{{ p.createdAt | date: 'medium' }}</time>
     </div>
 
-    @if (isOwner()) {
+    @if (hasMenuActions()) {
     <button mat-icon-button type="button" class="post-menu-trigger" [matMenuTriggerFor]="postMenu"
       (click)="$event.stopPropagation()" aria-label="Post settings">
       <mat-icon>more_vert</mat-icon>
     </button>
     <mat-menu #postMenu="matMenu">
+      @if (canEdit()) {
       <button mat-menu-item (click)="onEdit()">
         <mat-icon>edit</mat-icon>
         <span>Edit</span>
       </button>
-      @if(isAdmin() || isOwner()) {
+      }
+      @if (canReport()) {
+      <button mat-menu-item (click)="onReport()">
+        <mat-icon>report</mat-icon>
+        <span>Report</span>
+      </button>
+      }
+      @if (canDelete()) {
       <button mat-menu-item (click)="onDelete()">
         <mat-icon>delete</mat-icon>
         <span>Delete</span>
       </button>
       }
-    </mat-menu>
-    } @else {
-    <button mat-icon-button type="button" class="post-menu-trigger" [matMenuTriggerFor]="postMenu"
-      (click)="$event.stopPropagation()" aria-label="Post settings">
-      <mat-icon>more_vert</mat-icon>
-    </button>
-    <mat-menu #postMenu="matMenu">
-      <button mat-menu-item (click)="onReport()">
-        <mat-icon>report</mat-icon>
-        <span>Report</span>
-      </button>
     </mat-menu>
     }
 
@@ -56,6 +53,7 @@
   <footer class="post-stats">
     @if (canInteract()) {
     <button type="button" class="stat stat-button" [class.liked]="p.isLiked"
+      [disabled]="likePending()"
       (click)="$event.stopPropagation(); onLike()" [attr.aria-label]="p.isLiked ? 'Unlike' : 'Like'">
       <mat-icon class="stat-icon">{{ p.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
       <span>{{ p.likeCount }}</span>

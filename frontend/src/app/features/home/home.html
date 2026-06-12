@@ -17,10 +17,12 @@
   } @else {
     <section class="feed">
       @for (p of posts(); track p.id) {
-        <app-post-snippet
+        <post-snippet
           [post]="p"
+          [isAdmin]="isAdmin()"
           [canInteract]="isAuthenticated()"
           [currentUserId]="currentUserId()"
+          [likePending]="isLikePending(p.id)"
           (likeToggled)="onLikeToggled($event)"
           (likeStateChanged)="onLikeStateChanged($event)"
           (commentClicked)="onCommentClicked($event)"

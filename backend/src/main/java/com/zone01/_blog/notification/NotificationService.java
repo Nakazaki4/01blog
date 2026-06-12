@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class NotificationService {
 
@@ -22,10 +24,11 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> list(Long recipientId, int page, int size) {
+    public List<NotificationResponse> list(Long recipientId, int page, int size) {
         return notificationRepository
                 .findByRecipientIdOrderByCreatedAtDesc(recipientId, PageRequest.of(page, size))
-                .map(this::toResponse);
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

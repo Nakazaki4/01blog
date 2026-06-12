@@ -37,7 +37,7 @@ export interface PostReport {
 const SNIPPET_LENGTH = 180;
 
 @Component({
-  selector: 'app-post-snippet',
+  selector: 'post-snippet',
   imports: [DatePipe, RouterLink, MatIconModule, MatButtonModule, MatMenuModule],
   templateUrl: './post-snippet.html',
   styleUrl: './post-snippet.css',
@@ -46,6 +46,8 @@ export class Post {
   post = input.required<PostResponse>();
   canInteract = input<boolean>(false);
   currentUserId = input<number | null>(null);
+  isAdmin = input<boolean>(false);
+  likePending = input<boolean>(false);
 
   likeToggled = output<number>();
   likeStateChanged = output<{ postId: number; isLiked: boolean; likeCount: number }>();
@@ -62,9 +64,10 @@ export class Post {
     return uid != null && uid === this.post().author.id;
   });
 
-  isAdmin = computed(() => {
-    
-  })
+  canEdit = computed(() => this.isOwner());
+  canDelete = computed(() => this.isOwner() || this.isAdmin());
+  canReport = computed(() => this.canInteract() && (this.isAdmin() || !this.isOwner()));
+  hasMenuActions = computed(() => this.canEdit() || this.canDelete() || this.canReport());
 
   snippet = computed(() => {
     const stripped = stripMarkdown(this.post().description ?? '');
@@ -102,7 +105,7 @@ export class Post {
   }
 
   onLike(): void {
-    if (!this.canInteract()) return;
+    if (!this.canInteract() || this.likePending()) return;
     this.likeToggled.emit(this.post().id);
   }
 

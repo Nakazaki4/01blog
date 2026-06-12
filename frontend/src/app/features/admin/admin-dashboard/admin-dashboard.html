@@ -1,3 +1,156 @@
-<h1>Welcome, {{ user()?.username }}</h1>
-<p>Role: {{ user()?.role }}</p>
-<button (click)="logout()">Log out</button>
+<section class="admin-dashboard">
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">Admin dashboard</p>
+      <h1>Welcome, <span class="gradient-text">{{ user()?.username }}</span></h1>
+      <p class="subtitle">Role: {{ user()?.role }}</p>
+    </div>
+
+    <div class="header-actions">
+      <a mat-stroked-button routerLink="/admin/users">
+        <mat-icon>group</mat-icon>
+        Users
+      </a>
+      <a mat-stroked-button routerLink="/admin/posts">
+        <mat-icon>article</mat-icon>
+        Posts
+      </a>
+      <a mat-stroked-button routerLink="/admin/reports">
+        <mat-icon>flag</mat-icon>
+        Reports
+      </a>
+      <button mat-flat-button type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Log out
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="34" />
+    </div>
+  } @else if (error()) {
+    <div class="empty-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="loadDashboard()">Retry</button>
+    </div>
+  } @else {
+    <div class="stats-grid" aria-label="Admin overview">
+      <article class="stat-card users">
+        <mat-icon>group</mat-icon>
+        <div>
+          <span>{{ totals().users }}</span>
+          <p>Total users</p>
+        </div>
+      </article>
+
+      <article class="stat-card posts">
+        <mat-icon>article</mat-icon>
+        <div>
+          <span>{{ totals().posts }}</span>
+          <p>Total posts</p>
+        </div>
+      </article>
+
+      <article class="stat-card reports">
+        <mat-icon>flag</mat-icon>
+        <div>
+          <span>{{ totals().reports }}</span>
+          <p>Total reports</p>
+        </div>
+      </article>
+
+      <article class="stat-card pending">
+        <mat-icon>priority_high</mat-icon>
+        <div>
+          <span>{{ totals().pendingReports }}</span>
+          <p>Pending reports</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="dashboard-grid">
+      <section class="panel reports-panel">
+        <div class="panel-header">
+          <h2>Recent reports</h2>
+          <a routerLink="/admin/reports">View all</a>
+        </div>
+
+        @if (recentReports().length === 0) {
+          <p class="muted">No reports yet.</p>
+        } @else {
+          <div class="report-list">
+            @for (report of recentReports(); track report.id) {
+              <article class="report-row">
+                <div>
+                  <div class="row-title">
+                    <span>{{ report.reportedUser.username }}</span>
+                    <span
+                      class="status"
+                      [class.pending]="report.status === 'PENDING'"
+                      [class.reviewed]="report.status === 'REVIEWED'"
+                      [class.dismissed]="report.status === 'DISMISSED'">
+                      {{ report.status }}
+                    </span>
+                  </div>
+                  <p>{{ report.reason }}</p>
+                  <time>{{ report.createdAt | date: 'medium' }}</time>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Newest users</h2>
+          <a routerLink="/admin/users">Manage</a>
+        </div>
+
+        @if (recentUsers().length === 0) {
+          <p class="muted">No users found.</p>
+        } @else {
+          <div class="compact-list">
+            @for (adminUser of recentUsers(); track adminUser.id) {
+              <article class="compact-row">
+                <div>
+                  <strong>{{ adminUser.username }}</strong>
+                  <span>{{ adminUser.email }}</span>
+                </div>
+                <span class="pill-status" [class.warn]="adminUser.banned">
+                  {{ adminUser.banned ? 'Banned' : adminUser.role }}
+                </span>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="panel posts-panel">
+        <div class="panel-header">
+          <h2>Recent posts</h2>
+          <a routerLink="/admin/posts">Moderate</a>
+        </div>
+
+        @if (recentPosts().length === 0) {
+          <p class="muted">No posts found.</p>
+        } @else {
+          <div class="compact-list">
+            @for (post of recentPosts(); track post.id) {
+              <article class="post-row">
+                <div>
+                  <strong>{{ post.author.username }}</strong>
+                  <p>{{ postSnippet(post) }}</p>
+                </div>
+                <span>{{ post.reportCount ?? 0 }} reports</span>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</section>

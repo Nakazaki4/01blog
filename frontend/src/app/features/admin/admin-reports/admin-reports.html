@@ -1,4 +1,110 @@
 <section class="admin-page">
-  <h1>Review <span class="gradient-text">Reports</span></h1>
-  <p>Inspect user-submitted reports and take action.</p>
+  <header class="admin-header">
+    <div>
+      <h1>Review <span class="gradient-text">Reports</span></h1>
+      <p>Inspect user-submitted reports and take action.</p>
+    </div>
+
+    <label class="filter-box">
+      <span>Status</span>
+      <select [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="ALL">All</option>
+        <option value="PENDING">Pending</option>
+        <option value="REVIEWED">Reviewed</option>
+        <option value="DISMISSED">Dismissed</option>
+      </select>
+    </label>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner diameter="34" />
+    </div>
+  } @else if (error()) {
+    <div class="state error-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="loadReports()">Retry</button>
+    </div>
+  } @else if (reports().length === 0) {
+    <div class="state">
+      <mat-icon>flag</mat-icon>
+      <p>No reports found.</p>
+    </div>
+  } @else {
+    <div class="report-list">
+      @for (report of reports(); track report.id) {
+        <article class="report-card">
+          <div class="report-main">
+            <div class="report-title">
+              <strong>{{ report.reportedUser.username }}</strong>
+              <span
+                class="status"
+                [class.pending]="report.status === 'PENDING'"
+                [class.reviewed]="report.status === 'REVIEWED'"
+                [class.dismissed]="report.status === 'DISMISSED'">
+                {{ report.status }}
+              </span>
+            </div>
+            <p>{{ report.reason }}</p>
+            <div class="report-meta">
+              <span>Reported by {{ report.reporter.username }}</span>
+              <time>{{ report.createdAt | date: 'medium' }}</time>
+            </div>
+          </div>
+
+          <div class="row-actions">
+            @if (report.status !== 'REVIEWED') {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="isActionPending(report.id)"
+                (click)="updateStatus(report, 'REVIEWED')">
+                <mat-icon>done</mat-icon>
+                Review
+              </button>
+            }
+            @if (report.status !== 'DISMISSED') {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="isActionPending(report.id)"
+                (click)="updateStatus(report, 'DISMISSED')">
+                <mat-icon>cancel</mat-icon>
+                Dismiss
+              </button>
+            }
+            @if (report.status !== 'PENDING') {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Reopen report"
+                [disabled]="isActionPending(report.id)"
+                (click)="updateStatus(report, 'PENDING')">
+                <mat-icon>replay</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+
+    <footer class="pager">
+      <span>Page {{ page() + 1 }} of {{ totalPages() }} · {{ totalElements() }} reports</span>
+      <div>
+        <button mat-stroked-button type="button" [disabled]="page() === 0" (click)="previousPage()">
+          <mat-icon>chevron_left</mat-icon>
+          Previous
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="page() + 1 >= totalPages()"
+          (click)="nextPage()">
+          Next
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </footer>
+  }
 </section>

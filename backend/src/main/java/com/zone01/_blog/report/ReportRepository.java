@@ -9,9 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    Page<Report> findByStatus(String status, Pageable pageable);
+    Page<Report> findByStatus(ReportStatus status, Pageable pageable);
+
+    long countByReportedUserId(Long userId);
 
     @Modifying
     @Query("UPDATE Report r SET r.status = :newStatus WHERE r.id = :reportId")
-    void updateStatus(@Param("reportId") Long reportId, @Param("newStatus") String newStatus);
+    void updateStatus(@Param("reportId") Long reportId, @Param("newStatus") ReportStatus newStatus);
 }

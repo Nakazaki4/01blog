@@ -15,6 +15,17 @@
           <mat-icon>add_circle</mat-icon>
         </button>
 
+        @if (isAdmin()){
+          <button
+            mat-icon-button
+            type="button"
+            class="nav-icon"
+            (click)="redirectToDashboard()"
+            aria-label="Open dashboard">
+            <mat-icon>insert_chart</mat-icon>
+          </button>
+        }
+
         <button
           mat-icon-button
           type="button"

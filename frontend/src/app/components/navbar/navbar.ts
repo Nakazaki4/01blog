@@ -40,11 +40,16 @@ export class NavbarComponent {
 
   user = this.auth.currentUser;
   isAuthenticated = computed(() => !!this.user());
+  isAdmin = computed(() => this.auth.isAdmin());
 
   unreadCount = this.notifications.unreadCount;
   items = signal<NotificationResponse[]>([]);
   loading = signal(false);
   loadError = signal<string | null>(null);
+
+  redirectToDashboard(): void {
+    this.router.navigate(['/admin']);
+  }
 
   openCreatePost(): void {
     const ref = this.dialog.open<PostCreateDialogComponent, void, PostResponse>(
@@ -66,7 +71,7 @@ export class NavbarComponent {
     this.loadError.set(null);
     this.notifications.list(0, 20).subscribe({
       next: (page) => {
-        this.items.set(page.content);
+        this.items.set(page);
         this.loading.set(false);
       },
       error: () => {

@@ -55,7 +55,18 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """)
     Page<Object[]> findByAuthorWithCounts(Long authorId, Long viewerId, Pageable pageable);
 
+    @Query("""
+            SELECT p,
+                    (SELECT COUNT(l) FROM Like l WHERE l.post.id = p.id) AS likeCount,
+                    (SELECT COUNT(c) FROM Comment c WHERE c.post.id = p.id) AS commentCount,
+                    (SELECT COUNT(r) FROM Report r WHERE r.reportedUser.id = p.user.id) AS reportCount
+            FROM Post p
+            """)
+    Page<Object[]> findAllWithAdminCounts(Pageable pageable);
+
     List<Post> findByUserIdAndDeletedFalseOrderByCreatedAtDesc(Long userId);
+
+    long countByUserId(Long userId);
 
     boolean existsByIdAndDeletedFalse(Long id);
     Optional<Post> findById(Long id);

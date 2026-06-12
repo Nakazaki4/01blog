@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { PageResponse } from '../../components/post-snippet/post-snippet.service';
 
 export type NotificationType =
   | 'NEW_POST'
@@ -64,9 +63,9 @@ export class NotificationService {
     this.destroyRef.onDestroy(() => this.stopPolling());
   }
 
-  list(page = 0, size = 20): Observable<PageResponse<NotificationResponse>> {
+  list(page = 0, size = 20): Observable<NotificationResponse[]> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<PageResponse<NotificationResponse>>(this.API_URL, { params });
+    return this.http.get<NotificationResponse[]>(this.API_URL, { params });
   }
 
   markRead(id: number): Observable<void> {

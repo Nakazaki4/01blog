@@ -37,6 +37,8 @@ public class LikeService {
     public void addLike(Long postId, Long userId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        User actor = userRepository.findById(userId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
         User postAuthor = userRepository.findByPostId(postId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post author not found"));
@@ -46,18 +48,22 @@ public class LikeService {
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Post already liked");
         }
-        try {
-            Notification n = createNotification(post, postAuthor);
+
+        if (!actor.getId().equals(postAuthor.getId()) && !notificationRepo.existsByActorIdAndRecipientIdAndTypeAndPostId(
+                actor.getId(),
+                postAuthor.getId(),
+                NotificationType.NEW_LIKE,
+                post.getId()
+        )) {
+            Notification n = createNotification(post, actor, postAuthor);
             notificationRepo.save(n);
-        } catch (DataIntegrityViolationException ignored) {
-            return;
         }
     }
 
-    public Notification createNotification(Post post, User recipient) {
+    public Notification createNotification(Post post, User actor, User recipient) {
         Notification n = new Notification();
         n.setRecipient(recipient);
-        n.setActor(post.getUser());
+        n.setActor(actor);
         n.setCreatedAt(Instant.now());
         n.setRead(false);
         n.setPost(post);
@@ -67,7 +73,7 @@ public class LikeService {
     }
 
     @Transactional
-    public void removeLike(Long userId, Long postId) {
+    public void removeLike(Long postId, Long userId) {
         if (!postRepository.existsByIdAndDeletedFalse(postId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }

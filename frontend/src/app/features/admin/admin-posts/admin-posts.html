@@ -1,4 +1,83 @@
 <section class="admin-page">
-  <h1>Manage <span class="gradient-text">Posts</span></h1>
-  <p>Browse and moderate posts across the platform.</p>
+  <header class="admin-header">
+    <div>
+      <h1>Manage <span class="gradient-text">Posts</span></h1>
+      <p>Browse and moderate posts across the platform.</p>
+    </div>
+
+    <button mat-stroked-button type="button" (click)="loadPosts()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner diameter="34" />
+    </div>
+  } @else if (error()) {
+    <div class="state error-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="loadPosts()">Retry</button>
+    </div>
+  } @else if (posts().length === 0) {
+    <div class="state">
+      <mat-icon>article</mat-icon>
+      <p>No posts found.</p>
+    </div>
+  } @else {
+    <div class="post-list">
+      @for (post of posts(); track post.id) {
+        <article class="post-card" [class.deleted]="post.deleted">
+          <div class="post-main">
+            <div class="post-meta">
+              <a [routerLink]="['/profile', post.author.id]">{{ post.author.username }}</a>
+              <span>#{{ post.id }}</span>
+              <time>{{ post.createdAt | date: 'medium' }}</time>
+              @if (post.deleted) {
+                <span class="status warn">Deleted</span>
+              }
+            </div>
+            <p>{{ postSnippet(post) }}</p>
+            <div class="metrics">
+              <span><mat-icon>favorite</mat-icon>{{ post.likeCount }}</span>
+              <span><mat-icon>chat_bubble</mat-icon>{{ post.commentCount }}</span>
+              <span><mat-icon>flag</mat-icon>{{ post.reportCount ?? 0 }}</span>
+            </div>
+          </div>
+
+          <div class="row-actions">
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              aria-label="Delete post"
+              [disabled]="isActionPending(post.id)"
+              (click)="deletePost(post)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+
+    <footer class="pager">
+      <span>Page {{ page() + 1 }} of {{ totalPages() }} · {{ totalElements() }} posts</span>
+      <div>
+        <button mat-stroked-button type="button" [disabled]="page() === 0" (click)="previousPage()">
+          <mat-icon>chevron_left</mat-icon>
+          Previous
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="page() + 1 >= totalPages()"
+          (click)="nextPage()">
+          Next
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </footer>
+  }
 </section>
