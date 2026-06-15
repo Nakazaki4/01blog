@@ -38,6 +38,17 @@ public class AdminService {
         this.reportRepo = reportRepo;
     }
 
+    public record AdminStats(long totalUsers, long totalPosts, long totalReports, long totalPendingReports) {}
+
+    public AdminStats getStats() {
+        return new AdminStats(
+                userRepo.count(),
+                postRepo.count(),
+                reportRepo.count(),
+                reportRepo.countByStatus(ReportStatus.PENDING)
+        );
+    }
+
     @Transactional
     public List<AdminUserDto> getAllUsers(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size);

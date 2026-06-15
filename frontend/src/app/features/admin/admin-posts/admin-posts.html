@@ -72,7 +72,7 @@
         <button
           mat-stroked-button
           type="button"
-          [disabled]="page() + 1 >= totalPages()"
+          [disabled]="!canLoadMore()"
           (click)="nextPage()">
           Next
           <mat-icon>chevron_right</mat-icon>

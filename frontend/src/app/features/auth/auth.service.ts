@@ -46,9 +46,9 @@ export class AuthService {
   }
 
   getToken(): string {
-    if (!this.isBrowser) return "";
-    const user = localStorage.getItem(this.TOKEN_KEY)
-    return user ? JSON.parse(user) : "";
+    if (!this.isBrowser) return '';
+    const raw = localStorage.getItem(this.TOKEN_KEY);
+    return raw ? JSON.parse(raw).token ?? '' : '';
   }
 
   isLoggedIn(): boolean {

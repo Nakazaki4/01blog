@@ -63,27 +63,28 @@ export class NotificationService {
     this.destroyRef.onDestroy(() => this.stopPolling());
   }
 
-  list(page = 0, size = 20): Observable<NotificationResponse[]> {
-    const params = new HttpParams().set('page', page).set('size', size);
+  list(page = 0, size = 20, unreadOnly = false): Observable<NotificationResponse[]> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('unreadOnly', unreadOnly);
     return this.http.get<NotificationResponse[]>(this.API_URL, { params });
   }
 
   markRead(id: number): Observable<void> {
-    return this.http.post<void>(`${this.API_URL}/${id}/read`, null);
+    return this.http.patch<void>(`${this.API_URL}/${id}/read`, null);
   }
 
   markAllRead(): Observable<void> {
-    return this.http.post<void>(`${this.API_URL}/read-all`, null);
+    return this.http.patch<void>(`${this.API_URL}/read-all`, null);
   }
 
   refreshUnreadCount(): void {
     if (!this.auth.currentUser()) return;
-    this.http
-      .get<{ count: number }>(`${this.API_URL}/unread-count`)
-      .subscribe({
-        next: (res) => this.unreadCount.set(res.count),
-        error: () => {},
-      });
+    this.list(0, 50, true).subscribe({
+      next: (items) => this.unreadCount.set(items.length),
+      error: () => {},
+    });
   }
 
   private startPolling(): void {

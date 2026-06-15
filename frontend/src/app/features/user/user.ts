@@ -54,7 +54,7 @@ export class UserComponent extends PostHost {
   });
 
   isAuthenticated = computed(() => this.auth.currentUser() != null);
-  
+
   isAdmin = computed(() => this.auth.isAdmin());
 
   constructor() {
@@ -95,12 +95,12 @@ export class UserComponent extends PostHost {
     this.error.set(null);
     this.page = 0;
     this.hasMore.set(false);
+    this.posts.set([]);
     this.userService.getById(id).subscribe({
-      next: (p) => {
-        this.profile.set(p);
-        this.hasMore.set(p.posts.length === PAGE_SIZE);
-        this.posts.set(p.posts)
+      next: (profile) => {
+        this.profile.set(profile);
         this.loading.set(false);
+        this.loadInitialPosts(id);
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load profile');
@@ -110,20 +110,26 @@ export class UserComponent extends PostHost {
     });
   }
 
+  private loadInitialPosts(id: string): void {
+    this.postService.getByAuthor(id, 0, PAGE_SIZE).subscribe({
+      next: (posts) => {
+        this.posts.set(posts);
+        this.hasMore.set(posts.length === PAGE_SIZE);
+      },
+      error: () => { },
+    });
+  }
+
   private loadMore(): void {
     const p = this.profile();
     if (!p || this.loading() || this.loadingMore() || !this.hasMore()) return;
     this.loadingMore.set(true);
     const nextPage = this.page + 1;
     this.postService.getByAuthor(p.id, nextPage, PAGE_SIZE).subscribe({
-      next: (page) => {
-        const current = this.profile();
-        if (current) {
-          this.profile.set({ ...current, posts: [...current.posts, ...page.content] });
-          this.posts.set([...current.posts, ...page.content])
-        }
-        this.page = page.number;
-        this.hasMore.set(page.number + 1 < page.totalPages);
+      next: (posts) => {
+        this.posts.update((current) => [...current, ...posts]);
+        this.page = nextPage;
+        this.hasMore.set(posts.length === PAGE_SIZE);
         this.loadingMore.set(false);
       },
       error: () => {
@@ -167,36 +173,24 @@ export class UserComponent extends PostHost {
   }
 
   override onPostDeleted(postId: number): void {
-    const p = this.profile();
-    if (!p) return;
-    const posts = p.posts.filter((post) => post.id !== postId);
-    this.profile.set({ ...p, posts });
-    this.posts.set(posts);
+    this.posts.update((list) => list.filter((p) => p.id !== postId));
   }
 
   override onCommentCountChanged({ postId, commentCount }: { postId: number; commentCount: number }): void {
-    const p = this.profile();
-    if (!p) return;
-    const updated = p.posts.map((post) =>
-      post.id === postId ? { ...post, commentCount } : post,
+    this.posts.update((list) =>
+      list.map((p) => (p.id === postId ? { ...p, commentCount } : p)),
     );
-    this.profile.set({ ...p, posts: updated });
-    this.posts.set(updated);
   }
 
   override onLikeStateChanged({ postId, isLiked, likeCount }: { postId: number; isLiked: boolean; likeCount: number }): void {
-    const p = this.profile();
-    if (!p) return;
-    const updated = p.posts.map((post) =>
-      post.id === postId ? { ...post, isLiked, likeCount } : post,
+    this.posts.update((list) =>
+      list.map((p) => (p.id === postId ? { ...p, isLiked, likeCount } : p)),
     );
-    this.profile.set({ ...p, posts: updated });
-    this.posts.set(updated);
   }
 
   override onLikeToggled(postId: number): void {
     if (this.likePendingIds().has(postId)) return;
-    const current = this.profile()?.posts.find(p => p.id === postId);
+    const current = this.posts().find((p) => p.id === postId);
     if (!current) return;
     const nextLiked = !current.isLiked;
     const nextLikeCount = current.likeCount + (nextLiked ? 1 : -1);
@@ -204,20 +198,17 @@ export class UserComponent extends PostHost {
     this.updatePost(postId, { isLiked: nextLiked, likeCount: nextLikeCount });
     this.setLikePending(postId, true);
 
-    const call = nextLiked ?
-      this.postService.like(postId) :
-      this.postService.unlike(postId)
+    const call = nextLiked
+      ? this.postService.like(postId)
+      : this.postService.unlike(postId);
 
     call.subscribe({
       next: () => this.setLikePending(postId, false),
       error: () => {
-        this.updatePost(postId, {
-          isLiked: current.isLiked,
-          likeCount: current.likeCount,
-        });
+        this.updatePost(postId, { isLiked: current.isLiked, likeCount: current.likeCount });
         this.setLikePending(postId, false);
-      }
-    })
+      },
+    });
   }
 
   isLikePending(postId: number): boolean {
@@ -225,13 +216,9 @@ export class UserComponent extends PostHost {
   }
 
   private updatePost(postId: number, changes: Partial<PostResponse>): void {
-    const current = this.profile();
-    if (!current) return;
-    const posts = current.posts.map((post) =>
-      post.id === postId ? { ...post, ...changes } : post,
+    this.posts.update((list) =>
+      list.map((p) => (p.id === postId ? { ...p, ...changes } : p)),
     );
-    this.profile.set({ ...current, posts });
-    this.posts.set(posts);
   }
 
   private setLikePending(postId: number, pending: boolean): void {

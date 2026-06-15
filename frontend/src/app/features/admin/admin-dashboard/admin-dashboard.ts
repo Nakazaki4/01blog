@@ -7,14 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../auth/auth.service';
 import { stripMarkdown } from '../../../shared/markdown';
-import { AdminPost, AdminReport, AdminService, AdminUser } from '../admin.service';
-
-interface DashboardTotals {
-  users: number;
-  posts: number;
-  reports: number;
-  pendingReports: number;
-}
+import { AdminPost, AdminReport, AdminService, AdminStats, AdminUser } from '../admin.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -36,11 +29,11 @@ export class AdminDashboardComponent implements OnInit {
   user = this.auth.currentUser;
   loading = signal(false);
   error = signal<string | null>(null);
-  totals = signal<DashboardTotals>({
-    users: 0,
-    posts: 0,
-    reports: 0,
-    pendingReports: 0,
+  totals = signal<AdminStats>({
+    totalUsers: 0,
+    totalPosts: 0,
+    totalReports: 0,
+    totalPendingReports: 0,
   });
   recentUsers = signal<AdminUser[]>([]);
   recentPosts = signal<AdminPost[]>([]);
@@ -55,22 +48,16 @@ export class AdminDashboardComponent implements OnInit {
     this.error.set(null);
 
     forkJoin({
+      stats: this.admin.getStats(),
       users: this.admin.listUsers(0, 5),
       posts: this.admin.listPosts(0, 5),
       reports: this.admin.listReports(0, 5),
-      pendingReports: this.admin.listReports(0, 1, 'PENDING'),
     }).subscribe({
-      next: ({ users, posts, reports, pendingReports }) => {
-        this.totals.set({
-          users: users.length,
-          posts: posts.length,
-          reports: reports.length,
-          pendingReports: pendingReports.length,
-        });
+      next: ({ stats, users, posts, reports }) => {
+        this.totals.set(stats);
         this.recentUsers.set(users);
         this.recentPosts.set(posts);
         this.recentReports.set(reports);
-        console.log(reports)
         this.loading.set(false);
       },
       error: (err) => {

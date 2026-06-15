@@ -124,7 +124,7 @@ export class PostDetailComponent {
       next: (page) => {
         this.comments.set(page);
         this.commentCount.set(page.length);
-        this.hasMore.set(page.length + 1 < page.length);
+        this.hasMore.set(page.length === PAGE_SIZE);
         this.loadingComments.set(false);
       },
       error: (err) => {
@@ -141,9 +141,9 @@ export class PostDetailComponent {
     this.postService.listComments(this.post.id, nextPage, PAGE_SIZE).subscribe({
       next: (page) => {
         this.comments.update((list) => [...list, ...page]);
-        this.commentCount.set(page.length);
-        this.page = page.length;
-        this.hasMore.set(page.number + 1 < page.totalPages);
+        this.commentCount.update((n) => n + page.length);
+        this.page = nextPage;
+        this.hasMore.set(page.length === PAGE_SIZE);
         this.loadingMore.set(false);
       },
       error: () => {

@@ -48,6 +48,11 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<AdminService.AdminStats> getStats() {
+        return ResponseEntity.ok(adminService.getStats());
+    }
+
     @GetMapping("/users")
     public ResponseEntity<List<AdminUserDto>> listAllUsers(@AuthenticationPrincipal String userId,
                                                            @RequestParam(defaultValue = "0") int page,
@@ -56,8 +61,7 @@ public class AdminController {
         if (page < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page can't be negative");
         } else if (size > 20) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater"
-                    + " than 20");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater than 20");
         }
         return ResponseEntity.ok(adminService.getAllUsers(page, size, search));
     }
@@ -69,8 +73,7 @@ public class AdminController {
         if (page < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page can't be negative");
         } else if (size > 20) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater"
-                    + " than 20");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater than 20");
         }
         return ResponseEntity.ok(adminService.getAllPosts(page, size));
     }
@@ -83,10 +86,8 @@ public class AdminController {
         if (page < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page can't be negative");
         } else if (size > 20) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater"
-                    + " than 20");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size can't be greater than 20");
         }
-
         return ResponseEntity.ok(adminService.getAllReports(page, size, parseReportStatus(status)));
     }
 

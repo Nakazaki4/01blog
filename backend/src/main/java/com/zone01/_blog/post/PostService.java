@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,14 +43,14 @@ public class PostService {
         this.subscriptionRepo = subscriptionRepo;
     }
 
-    public Page<PostResponse> getFeed(Long userId, int page, int size) {
+    public List<PostResponse> getFeed(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findFeedForUser(userId, pageable).map(this::toDto);
+        return postRepo.findFeedForUser(userId, pageable).map(this::toDto).toList();
     }
 
-    public Page<PostResponse> getPublicFeed(int page, int size) {
+    public List<PostResponse> getPublicFeed(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findPublicFeed(pageable).map(this::toDto);
+        return postRepo.findPublicFeed(pageable).map(this::toDto).toList();
     }
 
     public PostResponse getById(Long postId, Long viewerId) {
@@ -61,12 +60,12 @@ public class PostService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
     }
 
-    public Page<PostResponse> getByAuthor(Long authorId, Long viewerId, int page, int size) {
+    public List<PostResponse> getByAuthor(Long authorId, Long viewerId, int page, int size) {
         if (!userRepo.existsById(authorId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).map(this::toDto);
+        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).map(this::toDto).toList();
     }
 
     public PostResponse create(Long authorId, String description) {

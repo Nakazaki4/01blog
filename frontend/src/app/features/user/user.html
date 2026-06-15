@@ -31,7 +31,7 @@
         </div>
 
         <ul class="stats" aria-label="Profile statistics">
-          <li><strong>{{ p.posts.length }}</strong> posts</li>
+          <li><strong>{{ posts().length }}</strong> posts</li>
           <li><strong>{{ p.subscribersCount }}</strong> subscribers</li>
           <li><strong>{{ p.followingCount }}</strong> following</li>
         </ul>
@@ -43,16 +43,17 @@
     </header>
 
     <section class="posts" aria-label="Posts by {{ p.username }}">
-      @if (p.posts.length === 0) {
+      @if (posts().length === 0) {
         <p class="status">No posts yet.</p>
       } @else {
         <div class="posts-grid">
-          @for (post of p.posts; track post.id) {
+          @for (post of posts(); track post.id) {
             <post-snippet
               [post]="post"
               [isAdmin]="isAdmin()"
               [canInteract]="isAuthenticated()"
               [currentUserId]="currentUserId()"
+              [ownerOverride]="isSelf()"
               [likePending]="isLikePending(post.id)"
               (likeToggled)="onLikeToggled($event)"
               (likeStateChanged)="onLikeStateChanged($event)"

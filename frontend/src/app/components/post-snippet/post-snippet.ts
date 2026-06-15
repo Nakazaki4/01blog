@@ -48,6 +48,7 @@ export class Post {
   currentUserId = input<number | null>(null);
   isAdmin = input<boolean>(false);
   likePending = input<boolean>(false);
+  ownerOverride = input<boolean | null>(null);
 
   likeToggled = output<number>();
   likeStateChanged = output<{ postId: number; isLiked: boolean; likeCount: number }>();
@@ -60,13 +61,15 @@ export class Post {
   private dialog = inject(MatDialog);
 
   isOwner = computed(() => {
+    const override = this.ownerOverride();
+    if (override !== null) return override;
     const uid = this.currentUserId();
     return uid != null && uid === this.post().author.id;
   });
 
   canEdit = computed(() => this.isOwner());
   canDelete = computed(() => this.isOwner() || this.isAdmin());
-  canReport = computed(() => this.canInteract() && (this.isAdmin() || !this.isOwner()));
+  canReport = computed(() => this.canInteract() && !this.isOwner());
   hasMenuActions = computed(() => this.canEdit() || this.canDelete() || this.canReport());
 
   snippet = computed(() => {

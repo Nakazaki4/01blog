@@ -3,6 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
 
+export interface AdminStats {
+  totalUsers: number;
+  totalPosts: number;
+  totalReports: number;
+  totalPendingReports: number;
+}
+
 export interface AdminUser {
   id: number;
   username: string;
@@ -42,6 +49,10 @@ export interface AdminReport {
 export class AdminService {
   private http = inject(HttpClient);
   private API_URL = 'http://localhost:8080/api/admin';
+
+  getStats(): Observable<AdminStats> {
+    return this.http.get<AdminStats>(`${this.API_URL}/stats`);
+  }
 
   listUsers(page = 0, size = 20, search = ''): Observable<AdminUser[]> {
     let params = new HttpParams().set('page', page).set('size', size);

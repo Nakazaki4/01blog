@@ -1,14 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PostResponse } from '../../components/post-snippet/post-snippet';
 
 export interface UserProfile {
   id: number;
   username: string;
   avatarUrl: string | null;
   bio: string | null;
-  posts: PostResponse[];
   subscribersCount: number;
   followingCount: number;
   isSubscribed: boolean;

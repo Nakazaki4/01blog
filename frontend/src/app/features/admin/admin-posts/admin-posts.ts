@@ -24,6 +24,7 @@ export class AdminPostsComponent implements OnInit {
   page = signal(0);
   totalElements = signal(0);
   actionPendingIds = signal<ReadonlySet<number>>(new Set());
+  canLoadMore = signal(false);
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.totalElements() / PAGE_SIZE)));
 
@@ -36,17 +37,17 @@ export class AdminPostsComponent implements OnInit {
     this.error.set(null);
     this.admin.listPosts(page, PAGE_SIZE).subscribe({
       next: (result) => {
+        this.canLoadMore.set(result.length < PAGE_SIZE ? false : true)  
         this.posts.set(result);
         this.totalElements.set(result.length);
-        this.page.set(result.length);
+        this.page.set(page);
         this.loading.set(false);
-        console.log(this.posts());
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load posts');
         this.loading.set(false);
       },
-    });    
+    });
   }
 
   deletePost(post: AdminPost): void {
@@ -72,7 +73,7 @@ export class AdminPostsComponent implements OnInit {
   }
 
   nextPage(): void {
-    if (this.page() + 1 >= this.totalPages()) return;
+    if (!this.canLoadMore()) return;
     this.loadPosts(this.page() + 1);
   }
 

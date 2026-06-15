@@ -11,7 +11,6 @@
         <option value="ALL">All</option>
         <option value="PENDING">Pending</option>
         <option value="REVIEWED">Reviewed</option>
-        <option value="DISMISSED">Dismissed</option>
       </select>
     </label>
   </header>
@@ -42,8 +41,7 @@
                 class="status"
                 [class.pending]="report.status === 'PENDING'"
                 [class.reviewed]="report.status === 'REVIEWED'"
-                [class.dismissed]="report.status === 'DISMISSED'">
-                {{ report.status }}
+                {{ report.status }}>
               </span>
             </div>
             <p>{{ report.reason }}</p>
@@ -62,16 +60,6 @@
                 (click)="updateStatus(report, 'REVIEWED')">
                 <mat-icon>done</mat-icon>
                 Review
-              </button>
-            }
-            @if (report.status !== 'DISMISSED') {
-              <button
-                mat-stroked-button
-                type="button"
-                [disabled]="isActionPending(report.id)"
-                (click)="updateStatus(report, 'DISMISSED')">
-                <mat-icon>cancel</mat-icon>
-                Dismiss
               </button>
             }
             @if (report.status !== 'PENDING') {

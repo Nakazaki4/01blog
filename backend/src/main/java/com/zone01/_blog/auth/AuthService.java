@@ -13,6 +13,7 @@ import com.zone01._blog.user.UserRepository;
 
 @Service
 public class AuthService {
+
     private final UserRepository users;
     private final PasswordEncoder encoder;
 
@@ -41,7 +42,7 @@ public class AuthService {
     }
 
     public User login(LoginRequest req) {
-        User user = users.findByUsername(req.username()).orElseThrow(
+        User user = users.findByUsernameOrEmail(req.username(), req.username()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username/Passord is incorrect"));
         if (!encoder.matches(req.password(), user.getPasswordHash())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username/Password is incorrect");

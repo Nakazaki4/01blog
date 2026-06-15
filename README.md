@@ -359,6 +359,21 @@ Mark all notifications as read. Requires auth.
 
 All admin endpoints require `ROLE_ADMIN`. Unauthorized requests return `403`.
 
+### `GET /api/admin/stats`
+Get platform-wide counts. Requires `ROLE_ADMIN`.
+
+**Response 200:**
+```json
+{
+  "totalUsers": 42,
+  "totalPosts": 158,
+  "totalReports": 10,
+  "totalPendingReports": 3
+}
+```
+
+---
+
 ### `GET /api/admin/users`
 List all users. Paginated.
 

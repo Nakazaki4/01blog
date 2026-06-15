@@ -39,7 +39,7 @@ export class AdminReportsComponent implements OnInit {
       next: (result) => {
         this.reports.set(result);
         this.totalElements.set(result.length);
-        this.page.set(result.length);
+        this.page.set(page);
         this.loading.set(false);
       },
       error: (err) => {

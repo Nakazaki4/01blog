@@ -84,9 +84,9 @@ export class HomeComponent extends PostHost implements OnInit {
     this.page = 0;
     this.hasMore.set(true);
     this.postService.getFeed(0, PAGE_SIZE).subscribe({
-      next: (page) => {
-        this.posts.set(page);
-        this.hasMore.set(page.length + 1 < page.length);
+      next: (posts) => {
+        this.posts.set(posts);
+        this.hasMore.set(posts.length === PAGE_SIZE);
         this.loading.set(false);
       },
       error: (err) => {
@@ -101,10 +101,10 @@ export class HomeComponent extends PostHost implements OnInit {
     this.loadingMore.set(true);
     const nextPage = this.page + 1;
     this.postService.getFeed(nextPage, PAGE_SIZE).subscribe({
-      next: (page) => {
-        this.posts.update((current) => [...current, ...page]);
-        this.page = page.length;
-        this.hasMore.set(page.length + 1 < page.length);
+      next: (posts) => {
+        this.posts.update((current) => [...current, ...posts]);
+        this.page = nextPage;
+        this.hasMore.set(posts.length === PAGE_SIZE);
         this.loadingMore.set(false);
       },
       error: () => {

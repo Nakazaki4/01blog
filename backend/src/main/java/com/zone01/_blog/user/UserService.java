@@ -34,7 +34,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<PostResponse> posts = postService.getByAuthor(userId, viewerId, 0, PROFILE_POSTS_PAGE_SIZE).getContent();
+        List<PostResponse> posts = postService.getByAuthor(userId, viewerId, 0, PROFILE_POSTS_PAGE_SIZE);
         long subscribers = subscriptionRepository.countBySubscribedToId(userId);
         long following = subscriptionRepository.countBySubscriberId(userId);
         boolean isSubscribed = viewerId > 0
