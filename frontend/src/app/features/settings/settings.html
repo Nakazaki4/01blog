@@ -1,0 +1,77 @@
+<div class="settings-shell">
+  <div class="settings-card">
+    <h1>Settings</h1>
+
+    <!-- Avatar -->
+    <section class="settings-section">
+      <h2>Avatar</h2>
+      <div class="avatar-row">
+        @if (avatarPreview()) {
+          <img class="avatar-preview" [src]="avatarPreview()" alt="Avatar preview" />
+        } @else {
+          <div class="avatar-placeholder"><mat-icon>person</mat-icon></div>
+        }
+        <label class="upload-btn" mat-stroked-button>
+          <input type="file" accept="image/jpeg,image/png" hidden (change)="onAvatarSelected($event)" />
+          Choose photo
+        </label>
+        <button mat-raised-button color="primary" [disabled]="!avatarFile() || loadingAvatar()" (click)="submitAvatar()">
+          {{ loadingAvatar() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+      @if (avatarError()) { <p class="error">{{ avatarError() }}</p> }
+      @if (avatarSuccess()) { <p class="success">Avatar updated.</p> }
+    </section>
+
+    <!-- Email -->
+    <section class="settings-section">
+      <h2>Change email</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>New email</mat-label>
+        <input matInput type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" />
+      </mat-form-field>
+      @if (emailError()) { <p class="error">{{ emailError() }}</p> }
+      @if (emailSuccess()) { <p class="success">Email updated.</p> }
+      <button mat-raised-button color="primary" [disabled]="!email() || loadingEmail()" (click)="submitEmail()">
+        {{ loadingEmail() ? 'Saving...' : 'Save' }}
+      </button>
+    </section>
+
+    <!-- Password -->
+    <section class="settings-section">
+      <h2>Change password</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>Current password</mat-label>
+        <input matInput type="password" [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" name="current" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>New password</mat-label>
+        <input matInput type="password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" name="new" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Confirm new password</mat-label>
+        <input matInput type="password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" name="confirm" />
+      </mat-form-field>
+      @if (passwordError()) { <p class="error">{{ passwordError() }}</p> }
+      @if (passwordSuccess()) { <p class="success">Password updated.</p> }
+      <button mat-raised-button color="primary" [disabled]="!currentPassword() || !newPassword() || loadingPassword()" (click)="submitPassword()">
+        {{ loadingPassword() ? 'Saving...' : 'Save' }}
+      </button>
+    </section>
+
+    <!-- Delete account -->
+    <section class="settings-section danger-section">
+      <h2>Delete account</h2>
+      <p class="danger-note">This will permanently delete your account and all your content.</p>
+      @if (!confirmDelete()) {
+        <button mat-stroked-button color="warn" (click)="confirmDelete.set(true)">Delete my account</button>
+      } @else {
+        <p class="danger-note">Are you sure? This cannot be undone.</p>
+        <div class="danger-actions">
+          <button mat-raised-button color="warn" (click)="deleteAccount()">Yes, delete</button>
+          <button mat-stroked-button (click)="confirmDelete.set(false)">Cancel</button>
+        </div>
+      }
+    </section>
+  </div>
+</div>

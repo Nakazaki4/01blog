@@ -66,6 +66,10 @@ export class NavbarComponent {
     if (id != null) this.router.navigate(['/profile', id]);
   }
 
+  goToSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+
   onBellOpened(): void {
     this.loading.set(true);
     this.loadError.set(null);

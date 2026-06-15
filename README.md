@@ -461,6 +461,57 @@ Update report status.
 
 ---
 
+## Settings
+
+All settings endpoints require auth.
+
+### `PATCH /api/settings/email`
+Change the authenticated user's email.
+
+**Request body:**
+```json
+{ "email": "newemail@example.com" }
+```
+
+**Response 204:** no body.
+
+**Errors:** `409` if email already in use, `400` if invalid format.
+
+---
+
+### `PATCH /api/settings/password`
+Change the authenticated user's password.
+
+**Request body:**
+```json
+{ "currentPassword": "old123", "newPassword": "new456" }
+```
+
+**Response 204:** no body.
+
+**Errors:** `401` if current password is wrong.
+
+---
+
+### `PATCH /api/settings/avatar`
+Upload a new avatar. **Content-Type: `multipart/form-data`**.
+
+**Form fields:**
+- `avatar` (file — image/jpeg, image/png)
+
+**Response 204:** no body.
+
+**Errors:** `400` if format invalid or size exceeded.
+
+---
+
+### `DELETE /api/settings/account`
+Permanently delete the authenticated user's account and all their content.
+
+**Response 204:** no body.
+
+---
+
 ## Media
 
 ### `GET /api/media/{filename}`
@@ -483,4 +534,5 @@ Serve an uploaded media file. Public.
 | `/api/posts/feed`, all writes on posts/comments/likes | USER or ADMIN |
 | `/api/users/me`, `/api/users/{id}/subscribe` | USER or ADMIN |
 | `/api/reports`, `/api/notifications/**` | USER or ADMIN |
+| `/api/settings` | USER or ADMIN |
 | `/api/admin/**` | ADMIN |

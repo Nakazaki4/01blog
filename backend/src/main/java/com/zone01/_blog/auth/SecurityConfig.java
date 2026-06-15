@@ -51,6 +51,7 @@ public class SecurityConfig {
                         // authenticated users
                         .requestMatchers("/api/reports/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/notifications/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/settings/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/users/me", "/api/users/*/subscribe").hasAnyRole("USER", "ADMIN")
 
                         .anyRequest().authenticated()

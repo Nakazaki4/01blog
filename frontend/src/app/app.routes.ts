@@ -8,12 +8,15 @@ import { AdminUsersComponent } from './features/admin/admin-users/admin-users';
 import { AdminPostsComponent } from './features/admin/admin-posts/admin-posts';
 import { AdminReportsComponent } from './features/admin/admin-reports/admin-reports';
 import { UserComponent } from './features/user/user';
+import { SettingsComponent } from './features/settings/settings';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: '', component: HomeComponent },
   { path: 'profile/:id', component: UserComponent },
+  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
   {
     path: 'admin',
     canActivate: [adminGuard],
