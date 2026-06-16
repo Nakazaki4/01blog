@@ -22,6 +22,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     SELECT s.subscribedTo.id FROM Subscription s WHERE s.subscriber.id = :userId
                 )
               )
+            ORDER BY p.createdAt DESC
             """)
     Page<Object[]> findFeedForUser(Long userId, Pageable pageable);
 
@@ -32,6 +33,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     false AS isLiked
             FROM Post p
             WHERE p.deleted = false
+            ORDER BY p.createdAt DESC
             """)
     Page<Object[]> findPublicFeed(Pageable pageable);
 

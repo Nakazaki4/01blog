@@ -35,9 +35,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(columnDefinition = "text")
-    private String bio;
-
     @Column(name = "avatar_url")
     private String avatarUrl;
 

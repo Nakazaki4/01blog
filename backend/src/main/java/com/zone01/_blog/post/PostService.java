@@ -1,5 +1,6 @@
 package com.zone01._blog.post;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.media.MediaService;
@@ -173,6 +175,16 @@ public class PostService {
             urls.add(m.group(1));
         }
         return urls;
+    }
+
+    public String storeImage(MultipartFile file){
+        String supabaseUrl;
+        try{
+        supabaseUrl = mediaService.store(file.getBytes(), file.getContentType(), file.getOriginalFilename());
+        }catch(IOException e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while processing image");
+        }
+        return supabaseUrl;
     }
 
     private PostResponse toDto(Object[] row) {

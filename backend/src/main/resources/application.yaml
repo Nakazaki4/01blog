@@ -31,3 +31,8 @@ app:
     url: ${SUPABASE_URL}
     service-key: ${SUPABASE_SERVICE_KEY}
     bucket: ${SUPABASE_BUCKET:Media}
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always

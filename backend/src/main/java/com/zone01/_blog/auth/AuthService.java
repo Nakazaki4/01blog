@@ -33,7 +33,6 @@ public class AuthService {
                 .username(req.username())
                 .email(req.email())
                 .passwordHash(encoder.encode(req.password()))
-                .bio(req.bio() != null ? req.bio() : "")
                 .avatarUrl(req.avatarUrl() != null ? req.avatarUrl() : "")
                 .role(Role.USER)
                 .banned(false)
@@ -44,11 +43,11 @@ public class AuthService {
     public User login(LoginRequest req) {
         User user = users.findByUsernameOrEmail(req.username(), req.username()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username/Passord is incorrect"));
-        if (!encoder.matches(req.password(), user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username/Password is incorrect");
-        }
         if (user.isBanned()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is banned");
+        }
+        if (!encoder.matches(req.password(), user.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username/Password is incorrect");
         }
         return user;
     }

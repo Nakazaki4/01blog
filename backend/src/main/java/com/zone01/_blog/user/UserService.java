@@ -45,7 +45,6 @@ public class UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getAvatarUrl(),
-                user.getBio(),
                 posts,
                 (int) subscribers,
                 (int) following,

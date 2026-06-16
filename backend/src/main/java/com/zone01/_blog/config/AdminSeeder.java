@@ -1,14 +1,16 @@
 package com.zone01._blog.config;
 
-import com.zone01._blog.user.Role;
-import com.zone01._blog.user.User;
-import com.zone01._blog.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import com.zone01._blog.user.Role;
+import com.zone01._blog.user.User;
+import com.zone01._blog.user.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @Order(1)
@@ -28,7 +30,7 @@ public class AdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepo.existsByEmail(adminEmail) || userRepo.existsByEmail(adminUsername)) return;
+        if (userRepo.existsByEmail(adminEmail) || userRepo.existsByUsername(adminUsername)) return;
 
         User user = new User();
         user.setEmail(adminEmail);
@@ -36,7 +38,5 @@ public class AdminSeeder implements CommandLineRunner {
         user.setPasswordHash(encoder.encode(adminPassword));
         user.setRole(Role.ADMIN);
         userRepo.save(user);
-
-        System.out.println("Admin user seeded: " + adminEmail);
     }
 }

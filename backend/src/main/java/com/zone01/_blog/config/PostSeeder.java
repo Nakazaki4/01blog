@@ -1,16 +1,18 @@
 package com.zone01._blog.config;
 
+import java.util.List;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
 import com.zone01._blog.post.Post;
 import com.zone01._blog.post.PostRepository;
 import com.zone01._blog.user.Role;
 import com.zone01._blog.user.User;
 import com.zone01._blog.user.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @Order(2)
@@ -42,7 +44,6 @@ public class PostSeeder implements CommandLineRunner {
                 .orElse(null);
 
         if (admin == null) {
-            System.out.println("PostSeeder: no admin user found, skipping");
             return;
         }
 

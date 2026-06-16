@@ -68,16 +68,18 @@ public class CommentService {
         User postAuthor = userRepo.findByPostId(postId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post owner not found")
         );
-        Notification n = createNotification(post, postAuthor);
-        notificationRepo.save(n);
+        if (!postAuthor.getId().equals(userId)) {
+            Notification n = createNotification(post, postAuthor, author);
+            notificationRepo.save(n);
+        }
 
         return toResponse(saved);
     }
 
-    public Notification createNotification(Post post, User recipient) {
+    public Notification createNotification(Post post, User recipient, User actor) {
         Notification n = new Notification();
         n.setRecipient(recipient);
-        n.setActor(post.getUser());
+        n.setActor(actor);
         n.setCreatedAt(Instant.now());
         n.setRead(false);
         n.setPost(post);

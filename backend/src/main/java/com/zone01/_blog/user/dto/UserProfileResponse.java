@@ -8,7 +8,6 @@ public record UserProfileResponse(
         Long id,
         String username,
         String avatarUrl,
-        String bio,
         List<PostResponse> posts,
         int subscribersCount,
         int followingCount,
