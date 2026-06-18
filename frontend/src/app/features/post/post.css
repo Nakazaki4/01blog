@@ -15,6 +15,23 @@
   color: var(--gray-700);
 }
 
+.post-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+}
+
+.post-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+  color: var(--hot-red);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);

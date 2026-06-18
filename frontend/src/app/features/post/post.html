@@ -3,24 +3,29 @@
     <mat-icon fontIcon="close" />
   </button>
 
+  @if (loadingPost()) {
+    <div class="post-loading"><mat-spinner diameter="32" /></div>
+  } @else if (postError()) {
+    <p class="post-error">{{ postError() }}</p>
+  } @else if (post(); as p) {
   <div class="layout">
     <section class="post-pane">
       <div class="post-scroll">
         <header class="post-header">
-          @if (post.author.avatarUrl) {
+          @if (p.author.avatarUrl) {
           <div class="avatar">
-            <img [src]="post.author.avatarUrl" [alt]="post.author.username" />
+            <img [src]="p.author.avatarUrl" [alt]="p.author.username" />
           </div>
           } @else {
-          <div class="avatar avatar-fallback">{{ post.author.username[0] }}</div>
+          <div class="avatar avatar-fallback">{{ p.author.username[0] }}</div>
           }
           <div class="author-meta">
-            <span class="username">{{ post.author.username }}</span>
-            <time class="created-at">{{ post.createdAt | date: 'medium' }}</time>
+            <span class="username">{{ p.author.username }}</span>
+            <time class="created-at">{{ p.createdAt | date: 'medium' }}</time>
           </div>
         </header>
 
-        <app-post-body [markdown]="post.description" class="description" />
+        <app-post-body [markdown]="p.description" class="description" />
       </div>
 
       <footer class="post-stats">
@@ -103,4 +108,5 @@
       }
     </aside>
   </div>
+  }
 </div>

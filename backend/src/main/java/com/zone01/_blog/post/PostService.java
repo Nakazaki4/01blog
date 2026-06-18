@@ -1,11 +1,14 @@
 package com.zone01._blog.post;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,7 @@ import com.zone01._blog.media.MediaService;
 import com.zone01._blog.notification.Notification;
 import com.zone01._blog.notification.NotificationRepository;
 import com.zone01._blog.notification.NotificationType;
+import com.zone01._blog.post.dto.FeedPost;
 import com.zone01._blog.post.dto.PostResponse;
 import com.zone01._blog.post.dto.UserPost;
 import com.zone01._blog.subscription.SubscriptionRepository;
@@ -45,14 +49,12 @@ public class PostService {
         this.subscriptionRepo = subscriptionRepo;
     }
 
-    public List<PostResponse> getFeed(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findFeedForUser(userId, pageable).map(this::toDto).toList();
+    public List<FeedPost> getFeed(Long userId, int page, int size) {
+        return postRepo.findFeedForUser(userId, PageRequest.of(page, size)).toList();
     }
 
-    public List<PostResponse> getPublicFeed(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findPublicFeed(pageable).map(this::toDto).toList();
+    public List<FeedPost> getPublicFeed(int page, int size) {
+        return postRepo.findPublicFeed(PageRequest.of(page, size)).toList();
     }
 
     public PostResponse getById(Long postId, Long viewerId) {
@@ -62,12 +64,12 @@ public class PostService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
     }
 
-    public List<PostResponse> getByAuthor(Long authorId, Long viewerId, int page, int size) {
+    public List<FeedPost> getByAuthor(Long authorId, Long viewerId, int page, int size) {
         if (!userRepo.existsById(authorId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).map(this::toDto).toList();
+        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).toList();
     }
 
     public PostResponse create(Long authorId, String description) {
@@ -177,11 +179,21 @@ public class PostService {
         return urls;
     }
 
-    public String storeImage(MultipartFile file){
+    public String storeImage(MultipartFile file) {
+        try {
+            BufferedImage image
+                    = ImageIO.read(file.getInputStream());
+            if (image == null) {
+                throw new IllegalArgumentException("Invalid image");
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image");
+        }
+
         String supabaseUrl;
-        try{
-        supabaseUrl = mediaService.store(file.getBytes(), file.getContentType(), file.getOriginalFilename());
-        }catch(IOException e){
+        try {
+            supabaseUrl = mediaService.store(file.getBytes(), file.getContentType(), file.getOriginalFilename());
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while processing image");
         }
         return supabaseUrl;
@@ -192,7 +204,6 @@ public class PostService {
         long likeCount = ((Number) row[1]).longValue();
         long commentCount = ((Number) row[2]).longValue();
         boolean isLiked = (boolean) row[3];
-
         return new PostResponse(
                 p.getId(),
                 new UserPost(

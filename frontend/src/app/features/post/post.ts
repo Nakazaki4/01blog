@@ -25,7 +25,7 @@ import {
 import { PostBodyComponent } from '../../components/post-body/post-body';
 
 export interface PostDetailData {
-  post: PostResponse;
+  postId: number;
 }
 
 export interface PostDetailResult {
@@ -64,15 +64,19 @@ export class PostDetailComponent {
   private page = 0;
   private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
 
-  post = inject<PostDetailData>(MAT_DIALOG_DATA).post;
+  private postId = inject<PostDetailData>(MAT_DIALOG_DATA).postId;
+
+  post = signal<PostResponse | null>(null);
+  loadingPost = signal(true);
+  postError = signal<string | null>(null);
 
   isAuthenticated = computed(() => !!this.auth.currentUser());
 
   commentContent = signal<string>('');
   comments = signal<CommentResponse[]>([]);
-  commentCount = signal<number>(this.post.commentCount);
-  isLiked = signal<boolean>(this.post.isLiked);
-  likeCount = signal<number>(this.post.likeCount);
+  commentCount = signal<number>(0);
+  isLiked = signal<boolean>(false);
+  likeCount = signal<number>(0);
   likePending = signal<boolean>(false);
   loadingComments = signal<boolean>(false);
   loadingMore = signal<boolean>(false);
@@ -93,7 +97,20 @@ export class PostDetailComponent {
   });
 
   constructor() {
-    this.loadComments();
+    this.postService.getById(this.postId).subscribe({
+      next: (post) => {
+        this.post.set(post);
+        this.isLiked.set(post.isLiked);
+        this.likeCount.set(post.likeCount);
+        this.commentCount.set(post.commentCount);
+        this.loadingPost.set(false);
+        this.loadComments();
+      },
+      error: (err) => {
+        this.postError.set(err.error?.message || 'Failed to load post');
+        this.loadingPost.set(false);
+      },
+    });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -120,7 +137,7 @@ export class PostDetailComponent {
     this.loadError.set(null);
     this.page = 0;
     this.hasMore.set(true);
-    this.postService.listComments(this.post.id, 0, PAGE_SIZE).subscribe({
+    this.postService.listComments(this.postId, 0, PAGE_SIZE).subscribe({
       next: (page) => {
         this.comments.set(page);
         this.commentCount.set(page.length);
@@ -138,7 +155,7 @@ export class PostDetailComponent {
     if (this.loadingComments() || this.loadingMore() || !this.hasMore()) return;
     this.loadingMore.set(true);
     const nextPage = this.page + 1;
-    this.postService.listComments(this.post.id, nextPage, PAGE_SIZE).subscribe({
+    this.postService.listComments(this.postId, nextPage, PAGE_SIZE).subscribe({
       next: (page) => {
         this.comments.update((list) => [...list, ...page]);
         this.commentCount.update((n) => n + page.length);
@@ -156,7 +173,7 @@ export class PostDetailComponent {
     if (!this.canSubmit()) return;
     const content = this.commentContent().trim();
     this.submitting.set(true);
-    this.postService.addComment(this.post.id, content).subscribe({
+    this.postService.addComment(this.postId, content).subscribe({
       next: (created) => {
         this.comments.update((list) => [created, ...list]);
         this.commentCount.update((n) => n + 1);
@@ -176,8 +193,8 @@ export class PostDetailComponent {
     this.likeCount.update((n) => n + (nextLiked ? 1 : -1));
     this.likePending.set(true);
     const call = nextLiked
-      ? this.postService.like(this.post.id)
-      : this.postService.unlike(this.post.id);
+      ? this.postService.like(this.postId)
+      : this.postService.unlike(this.postId);
     call.subscribe({
       next: () => this.likePending.set(false),
       error: () => {
@@ -190,7 +207,7 @@ export class PostDetailComponent {
 
   close(): void {
     this.dialogRef.close({
-      postId: this.post.id,
+      postId: this.postId,
       commentCount: this.commentCount(),
       isLiked: this.isLiked(),
       likeCount: this.likeCount(),

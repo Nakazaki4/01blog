@@ -34,8 +34,6 @@ export interface PostReport {
   reason: string;
 }
 
-const SNIPPET_LENGTH = 180;
-
 @Component({
   selector: 'post-snippet',
   imports: [DatePipe, RouterLink, MatIconModule, MatButtonModule, MatMenuModule],
@@ -73,17 +71,14 @@ export class Post {
   hasMenuActions = computed(() => this.canEdit() || this.canDelete() || this.canReport());
 
   snippet = computed(() => {
-    const stripped = stripMarkdown(this.post().description ?? '');
-    return stripped.length > SNIPPET_LENGTH
-      ? stripped.slice(0, SNIPPET_LENGTH).trimEnd() + '…'
-      : stripped;
+    return stripMarkdown(this.post().description ?? '');
   });
 
   openDetail(): void {
     const ref = this.dialog.open<PostDetailComponent, PostDetailData, PostDetailResult>(
       PostDetailComponent,
       {
-        data: { post: this.post() },
+        data: { postId: this.post().id },
         panelClass: 'post-detail-panel',
         autoFocus: false,
       },

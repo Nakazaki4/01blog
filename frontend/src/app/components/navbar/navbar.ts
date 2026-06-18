@@ -17,6 +17,8 @@ import {
   NotificationType,
 } from '../../features/notification/notification.service';
 
+import { ThemeService } from '../../shared/theme.service';
+
 @Component({
   selector: 'app-navbar',
   imports: [
@@ -37,6 +39,7 @@ export class NavbarComponent {
   private dialog = inject(MatDialog);
   private postEvents = inject(PostEventsService);
   private notifications = inject(NotificationService);
+  theme = inject(ThemeService);
 
   user = this.auth.currentUser;
   isAuthenticated = computed(() => !!this.user());
@@ -46,6 +49,9 @@ export class NavbarComponent {
   items = signal<NotificationResponse[]>([]);
   loading = signal(false);
   loadError = signal<string | null>(null);
+  private notifPage = 0;
+  private notifHasMore = false;
+  loadingMore = signal(false);
 
   redirectToDashboard(): void {
     this.router.navigate(['/admin']);
@@ -73,9 +79,11 @@ export class NavbarComponent {
   onBellOpened(): void {
     this.loading.set(true);
     this.loadError.set(null);
+    this.notifPage = 0;
     this.notifications.list(0, 20).subscribe({
       next: (page) => {
         this.items.set(page);
+        this.notifHasMore = page.length === 20;
         this.loading.set(false);
       },
       error: () => {
@@ -83,6 +91,24 @@ export class NavbarComponent {
         this.loading.set(false);
       },
     });
+  }
+
+  onNotifScroll(event: Event): void {
+    if (!this.notifHasMore || this.loadingMore()) return;
+    const el = event.target as HTMLElement;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 80) {
+      this.loadingMore.set(true);
+      const next = this.notifPage + 1;
+      this.notifications.list(next, 20).subscribe({
+        next: (page) => {
+          this.items.update((current) => [...current, ...page]);
+          this.notifPage = next;
+          this.notifHasMore = page.length === 20;
+          this.loadingMore.set(false);
+        },
+        error: () => this.loadingMore.set(false),
+      });
+    }
   }
 
   onItemClick(item: NotificationResponse, trigger: MatMenuTrigger): void {

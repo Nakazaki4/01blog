@@ -1,14 +1,14 @@
 package com.zone01._blog.media;
 
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class MediaService {

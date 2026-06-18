@@ -15,7 +15,7 @@
           <mat-icon>add_circle</mat-icon>
         </button>
 
-        @if (isAdmin()){
+        @if (isAdmin()) {
           <button
             mat-icon-button
             type="button"
@@ -63,7 +63,7 @@
           } @else if (items().length === 0) {
             <p class="notif-empty">No notifications yet.</p>
           } @else {
-            <div class="notif-list">
+            <div class="notif-list" (scroll)="onNotifScroll($event)">
               @for (item of items(); track item.id) {
                 <button
                   type="button"
@@ -82,6 +82,9 @@
                     <span class="notif-dot" aria-hidden="true"></span>
                   }
                 </button>
+              }
+              @if (loadingMore()) {
+                <div class="notif-loading"><mat-spinner diameter="20" /></div>
               }
             </div>
           }
