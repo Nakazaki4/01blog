@@ -42,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .map(u -> u.isBanned())
                         .orElse(false);
                 if (banned) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json");
                     response.getWriter().write("{\"message\": \"Your account has been banned\"}");
                     return;
