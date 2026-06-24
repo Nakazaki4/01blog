@@ -3,6 +3,8 @@ package com.zone01._blog.notification;
 import java.time.Instant;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.zone01._blog.post.Post;
 import com.zone01._blog.user.User;
@@ -36,10 +38,12 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recipient_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User recipient;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "actor_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User actor;
 
     @Enumerated(EnumType.STRING)
@@ -48,6 +52,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Post post;
 
     @Column(name = "is_read", nullable = false)

@@ -10,6 +10,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 
@@ -22,11 +24,13 @@ public class Subscription {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("subscriberId")
     @JoinColumn(name = "subscriber_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User subscriber;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("subscribedToId")
     @JoinColumn(name = "subscribed_to_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User subscribedTo;
 
     @CreationTimestamp

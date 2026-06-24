@@ -3,6 +3,8 @@ package com.zone01._blog.report;
 import java.time.Instant;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.zone01._blog.user.User;
 
@@ -37,10 +39,12 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reporter_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reported_user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User reportedUser;
 
     @Column(nullable = false, columnDefinition = "text")

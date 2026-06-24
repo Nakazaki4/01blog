@@ -33,10 +33,11 @@
           [matMenuTriggerFor]="notifMenu"
           #notifTrigger="matMenuTrigger"
           (menuOpened)="onBellOpened()"
-          [matBadge]="unreadCount()"
+          [matBadge]="unreadCount() > 99 ? '99+' : unreadCount()"
           [matBadgeHidden]="unreadCount() === 0"
           matBadgeColor="warn"
-          matBadgeSize="small"
+          matBadgeSize="medium"
+          matBadgeOverlap="true"
           aria-label="Notifications">
           <mat-icon>notifications</mat-icon>
         </button>

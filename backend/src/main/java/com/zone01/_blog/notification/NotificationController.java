@@ -16,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.PatchMapping;
+
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
@@ -47,7 +49,7 @@ public class NotificationController {
         return ResponseEntity.ok(Map.of("count", count));
     }
 
-    @PostMapping("/{id}/read")
+    @PatchMapping("/{id}/read")
     public ResponseEntity<Void> markRead(
             @AuthenticationPrincipal String principal,
             @PathVariable Long id) {
@@ -55,7 +57,7 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/read-all")
+    @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllRead(@AuthenticationPrincipal String principal) {
         notificationService.markAllRead(requireUserId(principal));
         return ResponseEntity.ok().build();

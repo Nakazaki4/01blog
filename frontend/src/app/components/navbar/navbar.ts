@@ -46,6 +46,7 @@ export class NavbarComponent {
   isAdmin = computed(() => this.auth.isAdmin());
 
   unreadCount = this.notifications.unreadCount;
+  
   items = signal<NotificationResponse[]>([]);
   loading = signal(false);
   loadError = signal<string | null>(null);

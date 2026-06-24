@@ -63,11 +63,10 @@ export class NotificationService {
     this.destroyRef.onDestroy(() => this.stopPolling());
   }
 
-  list(page = 0, size = 20, unreadOnly = false): Observable<NotificationResponse[]> {
+  list(page = 0, size = 20): Observable<NotificationResponse[]> {
     const params = new HttpParams()
       .set('page', page)
-      .set('size', size)
-      .set('unreadOnly', unreadOnly);
+      .set('size', size);
     return this.http.get<NotificationResponse[]>(this.API_URL, { params });
   }
 
@@ -81,8 +80,8 @@ export class NotificationService {
 
   refreshUnreadCount(): void {
     if (!this.auth.currentUser()) return;
-    this.list(0, 50, true).subscribe({
-      next: (items) => this.unreadCount.set(items.length),
+    this.http.get<{ count: number }>(`${this.API_URL}/unread-count`).subscribe({
+      next: (res) => this.unreadCount.set(res.count),
       error: () => {},
     });
   }

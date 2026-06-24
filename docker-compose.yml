@@ -12,5 +12,26 @@ services:
       - db-data:/var/lib/postgresql
     restart: unless-stopped
 
+  backend:
+    build: ./backend
+    container_name: 01blog-backend
+    env_file: ./backend/.env
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mainDB
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: 01blog-frontend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   db-data:
