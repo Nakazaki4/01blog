@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { PostSnippetService } from '../../components/post-snippet/post-snippet.service';
 import { Post, PostResponse } from '../../components/post-snippet/post-snippet';
@@ -20,7 +21,7 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-home',
-  imports: [Post],
+  imports: [Post, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -81,12 +82,12 @@ export class HomeComponent extends PostHost implements OnInit {
   loadFeed(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.page = 0;
-    this.hasMore.set(true);
+    this.page = 0
+    this.hasMore.set(this.isAuthenticated());
     this.postService.getFeed(0, PAGE_SIZE).subscribe({
       next: (posts) => {
         this.posts.set(posts);
-        this.hasMore.set(posts.length === PAGE_SIZE);
+        this.hasMore.set(this.isAuthenticated() && posts.length === PAGE_SIZE);
         this.loading.set(false);
       },
       error: (err) => {
@@ -97,6 +98,7 @@ export class HomeComponent extends PostHost implements OnInit {
   }
 
   private loadMore(): void {
+    if (!this.isAuthenticated()) return;
     if (this.loading() || this.loadingMore() || !this.hasMore()) return;
     this.loadingMore.set(true);
     const nextPage = this.page + 1;

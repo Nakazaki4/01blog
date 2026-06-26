@@ -36,7 +36,9 @@ public class PostController {
     }
 
     private static Long parseViewerId(String principal) {
-        if (principal == null || "anonymousUser".equals(principal)) return -1L;
+        if (principal == null || "anonymousUser".equals(principal)) {
+            return -1L;
+        }
         return Long.parseLong(principal);
     }
 
@@ -52,7 +54,7 @@ public class PostController {
 
         Long viewerId = parseViewerId(userId);
         if (viewerId == -1L) {
-            return ResponseEntity.ok(postService.getPublicFeed(page, size));
+            return ResponseEntity.ok(postService.getPublicFeed());
         }
         return ResponseEntity.ok(postService.getFeed(viewerId, page, size));
     }

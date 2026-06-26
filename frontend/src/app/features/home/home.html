@@ -8,6 +8,17 @@
     }
   </header>
 
+  @if (!isAuthenticated()) {
+    <section class="guest-banner">
+      <h2>Discover stories from the <span class="gradient-text">01 community</span></h2>
+      <p>You're browsing a preview of the latest posts. Create a free account to follow authors, like and comment on posts, and get a personalized feed.</p>
+      <div class="guest-banner-actions">
+        <a class="pill" routerLink="/register">Create an account</a>
+        <a class="pill pill-ghost" routerLink="/login">Log in</a>
+      </div>
+    </section>
+  }
+
   @if (loading()) {
     <p class="status">Loading feed…</p>
   } @else if (error(); as e) {
@@ -37,6 +48,13 @@
     }
     @if (loadingMore()) {
       <p class="status">Loading more…</p>
+    }
+    @if (!isAuthenticated()) {
+      <section class="guest-footer">
+        <h2>That's all for the preview</h2>
+        <p>Sign up to keep scrolling and unlock the full feed.</p>
+        <a class="pill" routerLink="/register">Join 01blog</a>
+      </section>
     }
   }
 </main>

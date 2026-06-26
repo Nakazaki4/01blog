@@ -53,8 +53,8 @@ public class PostService {
         return postRepo.findFeedForUser(userId, PageRequest.of(page, size)).toList();
     }
 
-    public List<FeedPost> getPublicFeed(int page, int size) {
-        return postRepo.findPublicFeed(PageRequest.of(page, size)).toList();
+    public List<FeedPost> getPublicFeed() {
+        return postRepo.findPublicFeed(PageRequest.of(0, 20)).toList();
     }
 
     public PostResponse getById(Long postId, Long viewerId) {

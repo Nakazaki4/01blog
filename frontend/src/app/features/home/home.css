@@ -59,3 +59,40 @@
   text-align: center;
   margin: 0;
 }
+
+.guest-banner,
+.guest-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--bright-blue) 20%, transparent);
+  background: color-mix(in srgb, var(--bright-blue) 4%, transparent);
+}
+
+.guest-banner h2,
+.guest-footer h2 {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.guest-banner p,
+.guest-footer p {
+  max-width: 520px;
+  margin: 0;
+}
+
+.guest-banner-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pill-ghost {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--bright-blue) 35%, transparent);
+}

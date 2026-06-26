@@ -28,7 +28,7 @@ services:
     build: ./frontend
     container_name: 01blog-frontend
     ports:
-      - "4000:4000"
+      - "4200:4000"
     depends_on:
       - backend
     restart: unless-stopped
