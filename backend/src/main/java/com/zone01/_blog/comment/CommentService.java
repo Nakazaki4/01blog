@@ -89,7 +89,7 @@ public class CommentService {
     }
 
     public Page<CommentResponse> listForPost(Long postId, int page, int size) {
-        if (!postRepo.existsByIdAndDeletedFalse(postId)) {
+        if (!postRepo.existsByIdAndDeletedFalseAndHiddenFalse(postId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }
         return commentRepo.findByPostIdOrderByCreatedAtDesc(postId, PageRequest.of(page, size))

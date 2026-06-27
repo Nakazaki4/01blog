@@ -33,4 +33,7 @@ public class Post {
 
     @Column(nullable = false)
     private boolean deleted = false;
+
+    @Column(nullable = false)
+    private boolean hidden = false;
 }

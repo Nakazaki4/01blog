@@ -74,7 +74,7 @@ public class LikeService {
 
     @Transactional
     public void removeLike(Long postId, Long userId) {
-        if (!postRepository.existsByIdAndDeletedFalse(postId)) {
+        if (!postRepository.existsByIdAndDeletedFalseAndHiddenFalse(postId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }
         int deleted = likeRepository.removeLike(postId, userId);

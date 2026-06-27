@@ -16,6 +16,7 @@ import { PostSnippetService } from '../../components/post-snippet/post-snippet.s
 import { Post, PostResponse } from '../../components/post-snippet/post-snippet';
 import { PostHost } from '../../components/post-snippet/post-host';
 import { PostEventsService } from '../../shared/post-events.service';
+import { AdminService } from '../admin/admin.service';
 
 const PAGE_SIZE = 20;
 
@@ -29,6 +30,7 @@ export class HomeComponent extends PostHost implements OnInit {
   private auth = inject(AuthService);
   private postService = inject(PostSnippetService);
   private postEvents = inject(PostEventsService);
+  private adminService = inject(AdminService);
   private destroyRef = inject(DestroyRef);
 
   user = this.auth.currentUser;
@@ -121,6 +123,17 @@ export class HomeComponent extends PostHost implements OnInit {
 
   override onPostDeleted(postId: number): void {
     this.posts.update((current) => current.filter((p) => p.id !== postId));
+  }
+
+  override onPostHidden(postId: number): void {
+    this.adminService.hidePost(postId).subscribe({
+      next: () => {
+        this.posts.update((current) => current.filter((p) => p.id !== postId));
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to hide post');
+      },
+    });
   }
 
   override onCommentCountChanged({ postId, commentCount }: { postId: number; commentCount: number }): void {

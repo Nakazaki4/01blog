@@ -21,6 +21,10 @@ export abstract class PostHost {
 
   abstract onPostDeleted(postId: number): void;
 
+  onPostHidden(postId: number): void {
+    console.log('hide post', postId);
+  }
+
   onPostReported(report: PostReport): void {
     console.log('report submitted', report);
   }

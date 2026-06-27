@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -33,6 +34,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     )
     FROM Post p
     WHERE p.deleted = false
+      AND p.hidden = false
       AND (
         p.user.id = :userId
         OR p.user.id IN (
@@ -55,6 +57,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     )
     FROM Post p
     WHERE p.deleted = false
+      AND p.hidden = false
     ORDER BY p.createdAt DESC
             """)
     Page<FeedPost> findPublicFeed(Pageable pageable);
@@ -65,7 +68,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     (SELECT COUNT(c) FROM Comment c WHERE c.post.id = p.id) AS commentCount,
                     (SELECT COUNT(l) > 0 FROM Like l WHERE l.post.id = p.id AND l.user.id = :viewerId) AS isLiked
             FROM Post p
-            WHERE p.id = :postId AND p.deleted = false
+            WHERE p.id = :postId AND p.deleted = false AND p.hidden = false
             """)
     List<Object[]> findByIdWithCounts(@Param("postId") Long postId, @Param("viewerId") Long viewerId);
 
@@ -88,7 +91,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 END
             )
             FROM Post p
-            WHERE p.user.id = :authorId AND p.deleted = false
+            WHERE p.user.id = :authorId AND p.deleted = false AND p.hidden = false
             ORDER BY p.createdAt DESC
             """)
     Page<FeedPost> findByAuthorWithCounts(@Param("authorId") Long authorId, @Param("viewerId") Long viewerId, Pageable pageable);
@@ -108,7 +111,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     long countByUserId(Long userId);
 
-    boolean existsByIdAndDeletedFalse(Long id);
+    boolean existsByIdAndDeletedFalseAndHiddenFalse(Long id);
 
     Optional<Post> findById(Long id);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.hidden = :state WHERE p.id = :postId")
+    int setHidden(@Param("postId") Long postId, @Param("state") boolean state);
 }

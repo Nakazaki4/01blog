@@ -37,6 +37,12 @@
         <span>Report</span>
       </button>
       }
+      @if (canHide()) {
+      <button mat-menu-item (click)="onHide()">
+        <mat-icon>visibility_off</mat-icon>
+        <span>Hide</span>
+      </button>
+      }
       @if (canDelete()) {
       <button mat-menu-item (click)="onDelete()">
         <mat-icon>delete</mat-icon>

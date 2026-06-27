@@ -12,6 +12,7 @@ public record AdminPostDto(
         long commentCount,
         long reportCount,
         boolean deleted,
+        boolean hidden,
         Instant createdAt
 ) {
 }

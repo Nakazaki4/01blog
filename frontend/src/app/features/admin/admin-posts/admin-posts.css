@@ -38,7 +38,8 @@
   background: #fff;
 }
 
-.post-card.deleted {
+.post-card.deleted,
+.post-card.hidden {
   opacity: 0.7;
 }
 
@@ -101,6 +102,11 @@
 .status.warn {
   background: color-mix(in srgb, var(--orange-red) 10%, transparent);
   color: var(--orange-red);
+}
+
+.status.info {
+  background: color-mix(in srgb, var(--gray-700) 12%, transparent);
+  color: var(--gray-700);
 }
 
 .row-actions {

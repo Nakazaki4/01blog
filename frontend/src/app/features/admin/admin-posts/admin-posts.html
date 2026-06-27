@@ -29,7 +29,7 @@
   } @else {
     <div class="post-list">
       @for (post of posts(); track post.id) {
-        <article class="post-card" [class.deleted]="post.deleted">
+        <article class="post-card" [class.deleted]="post.deleted" [class.hidden]="post.hidden">
           <div class="post-main">
             <div class="post-meta">
               <a [routerLink]="['/profile', post.author.id]">{{ post.author.username }}</a>
@@ -37,6 +37,9 @@
               <time>{{ post.createdAt | date: 'medium' }}</time>
               @if (post.deleted) {
                 <span class="status warn">Deleted</span>
+              }
+              @if (post.hidden) {
+                <span class="status info">Hidden</span>
               }
             </div>
             <p>{{ postSnippet(post) }}</p>
@@ -48,6 +51,15 @@
           </div>
 
           <div class="row-actions">
+            <button
+              mat-icon-button
+              type="button"
+              [attr.aria-label]="post.hidden ? 'Unhide post' : 'Hide post'"
+              [title]="post.hidden ? 'Unhide post' : 'Hide post'"
+              [disabled]="isActionPending(post.id)"
+              (click)="toggleHide(post)">
+              <mat-icon>{{ post.hidden ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
             <button
               mat-icon-button
               type="button"

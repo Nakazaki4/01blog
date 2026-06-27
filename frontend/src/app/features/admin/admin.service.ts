@@ -27,6 +27,7 @@ export interface AdminPost extends PostResponse {
   mediaType?: string | null;
   updatedAt?: string | null;
   deleted?: boolean;
+  hidden?: boolean;
 }
 
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'DISMISSED';
@@ -89,6 +90,14 @@ export class AdminService {
 
   deletePost(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/posts/${id}`);
+  }
+
+  hidePost(id: number): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/posts/${id}/hide`, null);
+  }
+
+  unhidePost(id: number): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/posts/${id}/unhide`, null);
   }
 
   updateReportStatus(id: number, status: ReportStatus): Observable<AdminReport> {

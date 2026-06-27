@@ -124,6 +124,18 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/posts/{id}/hide")
+    public ResponseEntity<Void> hidePost(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
+        adminService.switchHiddenState(id, true);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/{id}/unhide")
+    public ResponseEntity<Void> unhidePost(@AuthenticationPrincipal String adminId, @PathVariable Long id) {
+        adminService.switchHiddenState(id, false);
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/reports/{id}")
     public ResponseEntity<AdminReportDto> updateReportStatus(
             @PathVariable Long id,

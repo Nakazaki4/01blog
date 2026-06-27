@@ -67,6 +67,27 @@ export class AdminPostsComponent implements OnInit {
     });
   }
 
+  toggleHide(post: AdminPost): void {
+    if (this.isActionPending(post.id)) return;
+    const willHide = !post.hidden;
+    this.setActionPending(post.id, true);
+    const request = willHide ? this.admin.hidePost(post.id) : this.admin.unhidePost(post.id);
+    request.subscribe({
+      next: () => {
+        this.posts.update((posts) =>
+          posts.map((item) => (item.id === post.id ? { ...item, hidden: willHide } : item)),
+        );
+        this.setActionPending(post.id, false);
+      },
+      error: (err) => {
+        this.error.set(
+          err.error?.message || (willHide ? 'Failed to hide post' : 'Failed to unhide post'),
+        );
+        this.setActionPending(post.id, false);
+      },
+    });
+  }
+
   postSnippet(post: AdminPost): string {
     const text = stripMarkdown(post.description ?? '');
     return text.length > 180 ? `${text.slice(0, 180).trimEnd()}...` : text;

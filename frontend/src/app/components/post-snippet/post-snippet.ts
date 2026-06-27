@@ -54,6 +54,7 @@ export class Post {
   commentCountChanged = output<{ postId: number; commentCount: number }>();
   edited = output<number>();
   deleted = output<number>();
+  hidden = output<number>();
   reported = output<PostReport>();
 
   private dialog = inject(MatDialog);
@@ -67,8 +68,11 @@ export class Post {
 
   canEdit = computed(() => this.isOwner());
   canDelete = computed(() => this.isOwner() || this.isAdmin());
+  canHide = computed(() => this.isAdmin() && !this.isOwner());
   canReport = computed(() => this.canInteract() && !this.isOwner());
-  hasMenuActions = computed(() => this.canEdit() || this.canDelete() || this.canReport());
+  hasMenuActions = computed(
+    () => this.canEdit() || this.canDelete() || this.canHide() || this.canReport(),
+  );
 
   snippet = computed(() => {
     return stripMarkdown(this.post().description ?? '');
@@ -118,6 +122,10 @@ export class Post {
 
   onDelete(): void {
     this.deleted.emit(this.post().id);
+  }
+
+  onHide(): void {
+    this.hidden.emit(this.post().id);
   }
 
   onReport(): void {

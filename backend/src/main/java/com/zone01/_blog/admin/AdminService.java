@@ -115,6 +115,14 @@ public class AdminService {
         }
     }
 
+    @Transactional
+    public void switchHiddenState(Long postId, boolean flag) {
+        if (!postRepo.existsById(postId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post doesn't exist");
+        }
+        postRepo.setHidden(postId, flag);
+    }
+
     private AdminUserDto toAdminUserDto(User user) {
         return new AdminUserDto(
                 user.getId(),
@@ -142,6 +150,7 @@ public class AdminService {
                 commentCount,
                 reportCount,
                 post.isDeleted(),
+                post.isHidden(),
                 post.getCreatedAt()
         );
     }
