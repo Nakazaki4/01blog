@@ -125,6 +125,10 @@ export class HomeComponent extends PostHost implements OnInit {
     this.posts.update((current) => current.filter((p) => p.id !== postId));
   }
 
+  override onPostEdited(postId: number): void {
+    this.editPost(postId, this.posts);
+  }
+
   override onPostHidden(postId: number): void {
     this.adminService.hidePost(postId).subscribe({
       next: () => {

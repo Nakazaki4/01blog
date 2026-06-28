@@ -258,6 +258,20 @@
   align-items: flex-start;
 }
 
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-delete {
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+.comment-delete:hover {
+  opacity: 1;
+}
+
 .comment-avatar {
   width: 32px;
   height: 32px;

@@ -3,6 +3,8 @@ import {
   computed,
   ElementRef,
   inject,
+  input,
+  OnInit,
   output,
   signal,
   viewChild,
@@ -27,10 +29,14 @@ const MAX_CHARS = 10000;
   templateUrl: './post-create.html',
   styleUrl: './post-create.css',
 })
-export class PostCreateComponent {
+export class PostCreateComponent implements OnInit {
   private postService = inject(PostSnippetService);
 
+  editPostId = input<number | null>(null);
+  initialBody = input<string>('');
+
   postCreated = output<PostResponse>();
+  postUpdated = output<PostResponse>();
 
   textarea = viewChild.required<ElementRef<HTMLTextAreaElement>>('editor');
   fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
@@ -39,6 +45,13 @@ export class PostCreateComponent {
   uploading = signal(false);
   submitting = signal(false);
   error = signal<string | null>(null);
+
+  isEditing = computed(() => this.editPostId() != null);
+
+  ngOnInit(): void {
+    const initial = this.initialBody();
+    if (initial) this.body.set(initial);
+  }
 
   readonly minChars = MIN_CHARS;
   readonly maxChars = MAX_CHARS;
@@ -118,14 +131,26 @@ export class PostCreateComponent {
     this.error.set(null);
     this.submitting.set(true);
 
-    this.postService.create({ description }).subscribe({
+    const editId = this.editPostId();
+    const call = editId != null
+      ? this.postService.update(editId, { description })
+      : this.postService.create({ description });
+
+    call.subscribe({
       next: (post) => {
-        this.body.set('');
         this.submitting.set(false);
-        this.postCreated.emit(post);
+        if (editId != null) {
+          this.postUpdated.emit(post);
+        } else {
+          this.body.set('');
+          this.postCreated.emit(post);
+        }
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Could not create post');
+        this.error.set(
+          err.error?.message ||
+            (editId != null ? 'Could not update post' : 'Could not create post'),
+        );
         this.submitting.set(false);
       },
     });

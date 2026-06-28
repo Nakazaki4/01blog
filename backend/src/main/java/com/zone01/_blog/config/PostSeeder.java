@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Order(2)
 @RequiredArgsConstructor
 public class PostSeeder implements CommandLineRunner {
+
     private final PostRepository postRepo;
     private final UserRepository userRepo;
 
@@ -36,7 +37,9 @@ public class PostSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (postRepo.count() > 0) return;
+        if (postRepo.count() > 0) {
+            return;
+        }
 
         User admin = userRepo.findAll().stream()
                 .filter(u -> u.getRole() == Role.ADMIN)
@@ -51,6 +54,7 @@ public class PostSeeder implements CommandLineRunner {
             Post post = new Post();
             post.setUser(admin);
             post.setDescription(description);
+            post.setHidden(false);
             postRepo.save(post);
         }
 

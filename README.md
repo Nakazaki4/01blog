@@ -1,4 +1,115 @@
-# 01Blog — API Documentation
+# 01Blog
+
+A full-stack social blogging platform where users can publish posts (text + media), follow other users, like and comment, receive notifications, and report inappropriate content. Admins can moderate users, posts, and reports.
+
+## Tech Stack
+
+**Backend**
+- Java 17, Spring Boot 4.0
+- Spring Web, Spring Data JPA, Spring Security
+- PostgreSQL
+- JWT auth (jjwt 0.12)
+- Thumbnailator + webp-imageio (image processing)
+- Maven
+
+**Frontend**
+- Angular 21 (with SSR)
+- Angular Material + Tailwind CSS 4
+- RxJS, marked, DOMPurify
+- Vitest
+
+**Infrastructure**
+- Docker / Docker Compose
+- Supabase Storage (media bucket)
+
+## Prerequisites
+
+- Docker and Docker Compose — for the one-command setup
+- For local (non-Docker) development:
+  - Java 17+ and Maven 3.9+
+  - Node.js 20+ and npm 11+
+  - PostgreSQL 14+
+
+## Setup
+
+### 1. Clone
+
+```bash
+git clone <repo-url>
+cd 01blog
+```
+
+### 2. Configure environment
+
+Create `backend/.env` with the following variables:
+
+```env
+# Database (when running backend locally; Docker Compose overrides DB_URL)
+DB_URL=jdbc:postgresql://localhost:5433/mainDB
+DB_USERNAME=abdnour
+DB_PASSWORD=abdnour
+
+# Seeded admin account
+ADMIN_EMAIL=admin@example.com
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=changeme
+
+# JWT
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRATION_MS=3600000
+
+# Supabase media storage
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+SUPABASE_BUCKET=Media
+```
+
+### 3. Run with Docker (recommended)
+
+```bash
+docker-compose up --build
+```
+
+Services:
+- Frontend → http://localhost:4200
+- Backend API → http://localhost:8080/api
+- PostgreSQL → localhost:5433 (user `abdnour` / db `mainDB`)
+
+The schema is auto-created by Hibernate (`ddl-auto: update`) and the admin account is seeded on first boot.
+
+### 4. Run locally (without Docker)
+
+Start PostgreSQL (or just the `db` service: `docker-compose up db`), then:
+
+```bash
+# Backend
+cd backend
+./mvnw spring-boot:run
+```
+
+```bash
+# Frontend
+cd frontend
+npm install
+npm start
+```
+
+## Useful commands
+
+```bash
+# Backend tests
+cd backend && ./mvnw test
+
+# Frontend tests
+cd frontend && npm test
+
+# Production build
+cd frontend && npm run build
+```
+
+---
+
+# API Documentation
 
 Base URL: `http://localhost:8080/api`
 
@@ -49,9 +160,9 @@ Create a new user account. Public.
 ### `POST /api/auth/login`
 Authenticate and receive a JWT. Public.
 
-**Request body:**
+**Request body:** (the `username` field accepts either a username or an email)
 ```json
-{ "email": "alice@example.com", "password": "secret123" }
+{ "username": "alice", "password": "secret123" }
 ```
 
 **Response 200:**
@@ -171,11 +282,13 @@ Update own profile. Requires auth.
 ## Posts
 
 ### `GET /api/posts/feed`
-Get the authenticated user's feed (posts from subscribed users). Requires auth.
+Get the feed. Dual-mode:
+- Authenticated: paginated personalized feed (posts from subscribed users).
+- Unauthenticated: a public preview of recent posts (no pagination).
 
-**Query params:** `page`, `size`
+**Query params:** `page`, `size` (ignored when unauthenticated)
 
-**Response 200:** `Page<PostDto>`
+**Response 200:** `Page<PostDto>` when authenticated, plain `List<PostDto>` when not.
 
 **PostDto shape:**
 ```json
@@ -530,8 +643,9 @@ Serve an uploaded media file. Public.
 | `/api/auth/register`, `/api/auth/login` | public |
 | `/api/users/{id}`, `/api/users/{id}/posts`, `/api/users/{id}/subscribers`, `/api/users/{id}/subscriptions` | public |
 | `/api/posts/{id}`, `/api/posts/{id}/comments` (GET) | public |
+| `/api/posts/feed` (GET) | public (preview) / USER or ADMIN (personalized) |
 | `/api/media/**` | public |
-| `/api/posts/feed`, all writes on posts/comments/likes | USER or ADMIN |
+| all writes on posts/comments/likes | USER or ADMIN |
 | `/api/users/me`, `/api/users/{id}/subscribe` | USER or ADMIN |
 | `/api/reports`, `/api/notifications/**` | USER or ADMIN |
 | `/api/settings` | USER or ADMIN |

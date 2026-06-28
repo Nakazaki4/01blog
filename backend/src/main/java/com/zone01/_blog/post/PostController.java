@@ -22,6 +22,8 @@ import com.zone01._blog.media.MediaService;
 import com.zone01._blog.post.dto.CreatePostRequest;
 import com.zone01._blog.post.dto.PostResponse;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class PostController {
@@ -90,7 +92,7 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<PostResponse> create(
             @AuthenticationPrincipal String userId,
-            @RequestBody CreatePostRequest req) {
+            @Valid @RequestBody CreatePostRequest req) {
         PostResponse created = postService.create(Long.parseLong(userId), req.description());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -99,7 +101,7 @@ public class PostController {
     public ResponseEntity<PostResponse> update(
             @PathVariable Long id,
             @AuthenticationPrincipal String userId,
-            @RequestBody CreatePostRequest req) {
+            @Valid @RequestBody CreatePostRequest req) {
         return ResponseEntity.ok(postService.update(id, Long.parseLong(userId), req.description()));
     }
 

@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../auth/auth.service';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
 import {
@@ -60,6 +61,7 @@ export class PostDetailComponent {
   private dialogRef = inject(MatDialogRef<PostDetailComponent, PostDetailResult>);
   private destroyRef = inject(DestroyRef);
   private postService = inject(PostSnippetService);
+  private snackBar = inject(MatSnackBar);
 
   private page = 0;
   private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
@@ -71,6 +73,11 @@ export class PostDetailComponent {
   postError = signal<string | null>(null);
 
   isAuthenticated = computed(() => !!this.auth.currentUser());
+  isAdmin = computed(() => this.auth.isAdmin());
+  currentUserId = computed(() => {
+    const raw = this.auth.currentUser()?.userId;
+    return raw != null ? Number(raw) : null;
+  });
 
   commentContent = signal<string>('');
   comments = signal<CommentResponse[]>([]);
@@ -182,6 +189,40 @@ export class PostDetailComponent {
       },
       error: () => {
         this.submitting.set(false);
+      },
+    });
+  }
+
+  canDeleteComment(authorId: number): boolean {
+    if (this.isAdmin()) return true;
+    const me = this.currentUserId();
+    if (me == null) return false;
+    if (me === authorId) return true;
+    const post = this.post();
+    return post != null && me === post.author.id;
+  }
+
+  deleteComment(commentId: number): void {
+    const snapshot = this.comments();
+    const index = snapshot.findIndex((c) => c.id === commentId);
+    if (index === -1) return;
+    const removed = snapshot[index];
+    this.comments.update((list) => list.filter((c) => c.id !== commentId));
+    this.commentCount.update((n) => Math.max(0, n - 1));
+
+    this.postService.deleteComment(this.postId, commentId).subscribe({
+      error: (err) => {
+        this.comments.update((list) => {
+          const next = [...list];
+          next.splice(index, 0, removed);
+          return next;
+        });
+        this.commentCount.update((n) => n + 1);
+        this.snackBar.open(
+          err.error?.message || 'Failed to delete comment',
+          'Close',
+          { duration: 4000 },
+        );
       },
     });
   }

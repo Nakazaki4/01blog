@@ -88,6 +88,20 @@ public class CommentService {
         return n;
     }
 
+    public void deleteComment(Long postId, Long commentId, Long requesterId, boolean isAdmin) {
+        Comment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found");
+        }
+        boolean isOwner = comment.getUser().getId().equals(requesterId);
+        boolean isPostOwner = comment.getPost().getUser().getId().equals(requesterId);
+        if (!isAdmin && !isOwner && !isPostOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this comment");
+        }
+        commentRepo.delete(comment);
+    }
+
     public Page<CommentResponse> listForPost(Long postId, int page, int size) {
         if (!postRepo.existsByIdAndDeletedFalseAndHiddenFalse(postId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");

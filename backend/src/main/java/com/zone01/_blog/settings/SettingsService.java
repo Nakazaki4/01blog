@@ -1,10 +1,7 @@
 package com.zone01._blog.settings;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import javax.imageio.ImageIO;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -62,11 +59,6 @@ public class SettingsService {
 
         byte[] webp;
         try {
-            BufferedImage image
-                    = ImageIO.read(file.getInputStream());
-            if (image == null) {
-                throw new IllegalArgumentException("Invalid image");
-            }
             webp = convertToWebp(file);
         } catch (Exception e) {
             throw new ResponseStatusException(
@@ -76,7 +68,7 @@ public class SettingsService {
         }
 
         String oldUrl = user.getAvatarUrl();
-        String newUrl = media.store(webp, file.getContentType(), file.getOriginalFilename());
+        String newUrl = media.store(webp, "image/webp", file.getOriginalFilename());
         try {
             user.setAvatarUrl(newUrl);
             users.save(user);

@@ -22,10 +22,13 @@ import com.zone01._blog.admin.dto.AdminReportDto;
 import com.zone01._blog.admin.dto.AdminUserDto;
 import com.zone01._blog.report.ReportStatus;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-    public record ReportStatusUpdate(ReportStatus status) {
+    public record ReportStatusUpdate(@NotNull ReportStatus status) {
     }
 
     private final AdminService adminService;
@@ -139,11 +142,8 @@ public class AdminController {
     @PatchMapping("/reports/{id}")
     public ResponseEntity<AdminReportDto> updateReportStatus(
             @PathVariable Long id,
-            @RequestBody ReportStatusUpdate request
+            @Valid @RequestBody ReportStatusUpdate request
     ) {
-        if (request == null || request.status() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status is required");
-        }
         return ResponseEntity.ok(adminService.updateReportStatus(id, request.status()));
     }
 }

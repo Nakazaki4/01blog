@@ -2,10 +2,13 @@ package com.zone01._blog.comment;
 
 import com.zone01._blog.comment.dto.CommentRequest;
 import com.zone01._blog.comment.dto.CommentResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,8 +48,20 @@ public class CommentController {
     public ResponseEntity<CommentResponse> postComment(
             @AuthenticationPrincipal String userId,
             @PathVariable Long id,
-            @RequestBody CommentRequest req) {
+            @Valid @RequestBody CommentRequest req) {
         CommentResponse created = commentService.addComment(id, parseId(userId), req.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @DeleteMapping("/posts/{id}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @AuthenticationPrincipal String userId,
+            @PathVariable Long id,
+            @PathVariable Long commentId,
+            Authentication auth) {
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        commentService.deleteComment(id, commentId, parseId(userId), isAdmin);
+        return ResponseEntity.noContent().build();
     }
 }

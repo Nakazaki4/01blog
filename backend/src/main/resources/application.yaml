@@ -34,5 +34,6 @@ app:
 
 server:
   error:
-    include-message: always
-    include-binding-errors: always
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never

@@ -1,9 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PostCreateComponent } from './post-create';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
+
+export interface PostCreateDialogData {
+  postId: number;
+  description: string;
+}
 
 @Component({
   selector: 'app-post-create-dialog',
@@ -11,12 +16,16 @@ import { PostResponse } from '../../components/post-snippet/post-snippet';
   template: `
     <div class="dialog">
       <header class="dialog-header">
-        <h2>New post</h2>
+        <h2>{{ isEditing ? 'Edit post' : 'New post' }}</h2>
         <button mat-icon-button (click)="close()" aria-label="Close">
           <mat-icon>close</mat-icon>
         </button>
       </header>
-      <app-post-create (postCreated)="onCreated($event)" />
+      <app-post-create
+        [editPostId]="data?.postId ?? null"
+        [initialBody]="data?.description ?? ''"
+        (postCreated)="onDone($event)"
+        (postUpdated)="onDone($event)" />
     </div>
   `,
   styles: [`
@@ -47,12 +56,17 @@ import { PostResponse } from '../../components/post-snippet/post-snippet';
 })
 export class PostCreateDialogComponent {
   private dialogRef = inject(MatDialogRef<PostCreateDialogComponent, PostResponse>);
+  data = inject<PostCreateDialogData | null>(MAT_DIALOG_DATA, { optional: true });
+
+  get isEditing(): boolean {
+    return this.data?.postId != null;
+  }
 
   close(): void {
     this.dialogRef.close();
   }
 
-  onCreated(post: PostResponse): void {
+  onDone(post: PostResponse): void {
     this.dialogRef.close(post);
   }
 }

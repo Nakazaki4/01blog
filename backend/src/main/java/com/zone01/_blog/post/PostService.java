@@ -1,6 +1,5 @@
 package com.zone01._blog.post;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -8,13 +7,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.imageio.ImageIO;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -72,16 +70,8 @@ public class PostService {
         return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).toList();
     }
 
+    @Transactional
     public PostResponse create(Long authorId, String description) {
-        if (description == null || description.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
-        }
-        if (description.length() < 2000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least 2000 characters required");
-        }
-        if (description.length() > 10000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most 10000 characters allowed");
-        }
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
@@ -121,6 +111,7 @@ public class PostService {
         return n;
     }
 
+    @Transactional
     public PostResponse update(Long postId, Long requesterId, String description) {
         Post post = postRepo.findById(postId)
                 .filter(p -> !p.isDeleted())
@@ -128,15 +119,6 @@ public class PostService {
 
         if (!post.getUser().getId().equals(requesterId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not the post owner");
-        }
-        if (description == null || description.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
-        }
-        if (description.length() < 2000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least 2000 characters required");
-        }
-        if (description.length() > 10000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most 10000 characters allowed");
         }
 
         List<String> previousImages = extractImageUrls(post.getDescription());
@@ -181,22 +163,10 @@ public class PostService {
 
     public String storeImage(MultipartFile file) {
         try {
-            BufferedImage image
-                    = ImageIO.read(file.getInputStream());
-            if (image == null) {
-                throw new IllegalArgumentException("Invalid image");
-            }
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image");
-        }
-
-        String supabaseUrl;
-        try {
-            supabaseUrl = mediaService.store(file.getBytes(), file.getContentType(), file.getOriginalFilename());
+            return mediaService.store(file.getBytes(), file.getContentType(), file.getOriginalFilename());
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while processing image");
         }
-        return supabaseUrl;
     }
 
     private PostResponse toDto(Object[] row) {

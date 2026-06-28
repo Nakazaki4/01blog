@@ -79,6 +79,16 @@
             </div>
             <p class="comment-content">{{ comment.content }}</p>
           </div>
+          @if (canDeleteComment(comment.author.id)) {
+            <button
+              mat-icon-button
+              type="button"
+              class="comment-delete"
+              (click)="deleteComment(comment.id)"
+              aria-label="Delete comment">
+              <mat-icon fontIcon="delete" />
+            </button>
+          }
         </article>
         }
         @if (hasMore()) {

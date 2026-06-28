@@ -44,7 +44,7 @@
         color="primary"
         (click)="submit()"
         [disabled]="uploading() || submitting() || outOfRange()">
-        {{ submitting() ? 'Posting…' : 'Post' }}
+        {{ submitting() ? (isEditing() ? 'Saving…' : 'Posting…') : (isEditing() ? 'Save' : 'Post') }}
       </button>
     </div>
   </footer>
