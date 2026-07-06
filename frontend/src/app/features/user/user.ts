@@ -1,10 +1,12 @@
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
   effect,
   ElementRef,
   inject,
+  Injector,
   signal,
   viewChild,
 } from '@angular/core';
@@ -31,6 +33,7 @@ export class UserComponent extends PostHost {
   private auth = inject(AuthService);
   private adminService = inject(AdminService);
   private destroyRef = inject(DestroyRef);
+  private injector = inject(Injector);
 
   profile = signal<UserProfile | null>(null);
   posts = signal<PostResponse[] | []>([])
@@ -62,23 +65,28 @@ export class UserComponent extends PostHost {
   constructor() {
     super();
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          this.loadMore();
-        }
-      },
-      { rootMargin: '400px' },
-    );
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    afterNextRender(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            this.loadMore();
+          }
+        },
+        { rootMargin: '400px' },
+      );
+      this.destroyRef.onDestroy(() => observer.disconnect());
 
-    let observed: HTMLElement | null = null;
-    effect(() => {
-      const el = this.sentinel()?.nativeElement ?? null;
-      if (el === observed) return;
-      if (observed) observer.unobserve(observed);
-      if (el) observer.observe(el);
-      observed = el;
+      let observed: HTMLElement | null = null;
+      effect(
+        () => {
+          const el = this.sentinel()?.nativeElement ?? null;
+          if (el === observed) return;
+          if (observed) observer.unobserve(observed);
+          if (el) observer.observe(el);
+          observed = el;
+        },
+        { injector: this.injector },
+      );
     });
 
     this.route.paramMap.subscribe((params) => {
@@ -175,7 +183,27 @@ export class UserComponent extends PostHost {
   }
 
   override onPostDeleted(postId: number): void {
-    this.posts.update((list) => list.filter((p) => p.id !== postId));
+    const post = this.posts().find((p) => p.id === postId);
+    if (!post) return;
+    const uid = this.currentUserId();
+    const isOwner = uid != null && uid === post.author.id;
+    const call = isOwner
+      ? this.postService.delete(postId)
+      : this.adminService.deletePost(postId);
+    call.subscribe({
+      next: () => {
+        this.posts.update((list) => list.filter((p) => p.id !== postId));
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to delete post');
+      },
+    });
+  }
+
+  override onPostUpdated(updated: PostResponse): void {
+    this.posts.update((list) =>
+      list.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)),
+    );
   }
 
   override onPostHidden(postId: number): void {

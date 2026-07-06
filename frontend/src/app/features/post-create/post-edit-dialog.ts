@@ -1,22 +1,30 @@
 import { Component, inject } from '@angular/core';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PostCreateComponent } from './post-create';
 import { PostResponse } from '../../components/post-snippet/post-snippet';
 
+export interface PostEditDialogData {
+  postId: number;
+  description: string;
+}
+
 @Component({
-  selector: 'app-post-create-dialog',
+  selector: 'app-post-edit-dialog',
   imports: [MatDialogModule, MatIconModule, MatButtonModule, PostCreateComponent],
   template: `
     <div class="dialog">
       <header class="dialog-header">
-        <h2>New post</h2>
+        <h2>Edit post</h2>
         <button mat-icon-button (click)="close()" aria-label="Close">
           <mat-icon>close</mat-icon>
         </button>
       </header>
-      <app-post-create (postSaved)="onCreated($event)" />
+      <app-post-create
+        [postId]="data.postId"
+        [initialDescription]="data.description"
+        (postSaved)="onSaved($event)" />
     </div>
   `,
   styles: [`
@@ -45,14 +53,15 @@ import { PostResponse } from '../../components/post-snippet/post-snippet';
     }
   `],
 })
-export class PostCreateDialogComponent {
-  private dialogRef = inject(MatDialogRef<PostCreateDialogComponent, PostResponse>);
+export class PostEditDialogComponent {
+  data = inject<PostEditDialogData>(MAT_DIALOG_DATA);
+  private dialogRef = inject(MatDialogRef<PostEditDialogComponent, PostResponse>);
 
   close(): void {
     this.dialogRef.close();
   }
 
-  onCreated(post: PostResponse): void {
+  onSaved(post: PostResponse): void {
     this.dialogRef.close(post);
   }
 }

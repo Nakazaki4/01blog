@@ -1,4 +1,23 @@
 <section class="composer">
+  @if (currentImages().length) {
+    <div class="composer-thumbnails">
+      @for (url of currentImages(); track url) {
+        <div class="thumbnail">
+          <img [src]="url" alt="Post image" />
+          <button
+            type="button"
+            mat-icon-button
+            class="thumbnail-remove"
+            (click)="removeImage(url)"
+            [disabled]="submitting()"
+            aria-label="Remove image">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   <textarea
     #editor
     class="composer-input"
@@ -44,7 +63,11 @@
         color="primary"
         (click)="submit()"
         [disabled]="uploading() || submitting() || outOfRange()">
-        {{ submitting() ? 'Posting…' : 'Post' }}
+        @if (isEditMode()) {
+          {{ submitting() ? 'Saving…' : 'Save changes' }}
+        } @else {
+          {{ submitting() ? 'Posting…' : 'Post' }}
+        }
       </button>
     </div>
   </footer>

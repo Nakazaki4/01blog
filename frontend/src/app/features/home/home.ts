@@ -1,10 +1,12 @@
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
   effect,
   ElementRef,
   inject,
+  Injector,
   OnInit,
   signal,
   viewChild,
@@ -32,6 +34,7 @@ export class HomeComponent extends PostHost implements OnInit {
   private postEvents = inject(PostEventsService);
   private adminService = inject(AdminService);
   private destroyRef = inject(DestroyRef);
+  private injector = inject(Injector);
 
   user = this.auth.currentUser;
   isAuthenticated = computed(() => !!this.user());
@@ -54,23 +57,28 @@ export class HomeComponent extends PostHost implements OnInit {
 
   constructor() {
     super();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          this.loadMore();
-        }
-      },
-      { rootMargin: '400px' },
-    );
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    afterNextRender(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            this.loadMore();
+          }
+        },
+        { rootMargin: '400px' },
+      );
+      this.destroyRef.onDestroy(() => observer.disconnect());
 
-    let observed: HTMLElement | null = null;
-    effect(() => {
-      const el = this.sentinel()?.nativeElement ?? null;
-      if (el === observed) return;
-      if (observed) observer.unobserve(observed);
-      if (el) observer.observe(el);
-      observed = el;
+      let observed: HTMLElement | null = null;
+      effect(
+        () => {
+          const el = this.sentinel()?.nativeElement ?? null;
+          if (el === observed) return;
+          if (observed) observer.unobserve(observed);
+          if (el) observer.observe(el);
+          observed = el;
+        },
+        { injector: this.injector },
+      );
     });
   }
 
@@ -122,7 +130,27 @@ export class HomeComponent extends PostHost implements OnInit {
   }
 
   override onPostDeleted(postId: number): void {
-    this.posts.update((current) => current.filter((p) => p.id !== postId));
+    const post = this.posts().find((p) => p.id === postId);
+    if (!post) return;
+    const uid = this.currentUserId();
+    const isOwner = uid != null && uid === post.author.id;
+    const call = isOwner
+      ? this.postService.delete(postId)
+      : this.adminService.deletePost(postId);
+    call.subscribe({
+      next: () => {
+        this.posts.update((current) => current.filter((p) => p.id !== postId));
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to delete post');
+      },
+    });
+  }
+
+  override onPostUpdated(updated: PostResponse): void {
+    this.posts.update((list) =>
+      list.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)),
+    );
   }
 
   override onPostHidden(postId: number): void {

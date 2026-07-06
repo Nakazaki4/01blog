@@ -50,6 +50,14 @@ export class PostSnippetService {
     return this.http.post<PostResponse>(this.API_URL, req);
   }
 
+  update(id: number, req: CreatePostRequest): Observable<PostResponse> {
+    return this.http.put<PostResponse>(`${this.API_URL}/${id}`, req);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  }
+
   uploadImage(formData: FormData): Observable<{ url: string }> {
     return this.http.post<{ url: string }>(`${this.API_URL}/upload-image`, formData);
   }

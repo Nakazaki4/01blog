@@ -52,7 +52,7 @@ export class Post {
   likeStateChanged = output<{ postId: number; isLiked: boolean; likeCount: number }>();
   commentClicked = output<number>();
   commentCountChanged = output<{ postId: number; commentCount: number }>();
-  edited = output<number>();
+  edited = output<PostResponse>();
   deleted = output<number>();
   hidden = output<number>();
   reported = output<PostReport>();
@@ -117,7 +117,7 @@ export class Post {
   }
 
   onEdit(): void {
-    this.edited.emit(this.post().id);
+    this.edited.emit(this.post());
   }
 
   onDelete(): void {

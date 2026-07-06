@@ -1,8 +1,10 @@
 import {
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -20,6 +22,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const MIN_CHARS = 2000;
 const MAX_CHARS = 10000;
+const IMAGE_MARKDOWN = /!\[[^\]]*\]\(([^)]+)\)/g;
 
 @Component({
   selector: 'app-post-create',
@@ -30,7 +33,10 @@ const MAX_CHARS = 10000;
 export class PostCreateComponent {
   private postService = inject(PostSnippetService);
 
-  postCreated = output<PostResponse>();
+  postId = input<number | null>(null);
+  initialDescription = input<string>('');
+
+  postSaved = output<PostResponse>();
 
   textarea = viewChild.required<ElementRef<HTMLTextAreaElement>>('editor');
   fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
@@ -46,10 +52,36 @@ export class PostCreateComponent {
   tooShort = computed(() => this.charCount() < MIN_CHARS);
   tooLong = computed(() => this.charCount() > MAX_CHARS);
   outOfRange = computed(() => this.tooShort() || this.tooLong());
+  isEditMode = computed(() => this.postId() !== null);
+  currentImages = computed(() => {
+    const urls: string[] = [];
+    const re = new RegExp(IMAGE_MARKDOWN);
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(this.body())) !== null) {
+      urls.push(match[1]);
+    }
+    return urls;
+  });
+
+  constructor() {
+    effect(() => {
+      const initial = this.initialDescription();
+      if (initial) {
+        this.body.set(initial);
+      }
+    });
+  }
 
   onPickImage(): void {
     if (this.uploading() || this.submitting()) return;
     this.fileInput().nativeElement.click();
+  }
+
+  removeImage(url: string): void {
+    if (this.submitting()) return;
+    const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`\\n?!\\[[^\\]]*\\]\\(${escaped}\\)\\n?`, 'g');
+    this.body.set(this.body().replace(pattern, '\n'));
   }
 
   onFileSelected(event: Event): void {
@@ -118,14 +150,21 @@ export class PostCreateComponent {
     this.error.set(null);
     this.submitting.set(true);
 
-    this.postService.create({ description }).subscribe({
+    const id = this.postId();
+    const call = id !== null
+      ? this.postService.update(id, { description })
+      : this.postService.create({ description });
+
+    call.subscribe({
       next: (post) => {
-        this.body.set('');
+        if (id === null) this.body.set('');
         this.submitting.set(false);
-        this.postCreated.emit(post);
+        this.postSaved.emit(post);
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Could not create post');
+        this.error.set(
+          err.error?.message || (id !== null ? 'Could not update post' : 'Could not create post'),
+        );
         this.submitting.set(false);
       },
     });
