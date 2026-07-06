@@ -81,5 +81,10 @@ public class LikeService {
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Post not liked");
         }
+        User postAuthor = userRepository.findByPostId(postId).orElse(null);
+        if (postAuthor != null && !postAuthor.getId().equals(userId)) {
+            notificationRepo.deleteByActorAndRecipientAndTypeAndPost(
+                    userId, postAuthor.getId(), NotificationType.NEW_LIKE, postId);
+        }
     }
 }

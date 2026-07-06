@@ -10,6 +10,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../features/auth/auth.service';
 import { PostCreateDialogComponent } from '../../features/post-create/post-create-dialog';
 import { PostResponse } from '../post-snippet/post-snippet';
+import {
+  PostDetailComponent,
+  PostDetailData,
+  PostDetailResult,
+} from '../../features/post/post';
 import { PostEventsService } from '../../shared/post-events.service';
 import {
   NotificationResponse,
@@ -165,7 +170,15 @@ export class NavbarComponent {
     if (item.type === 'NEW_SUBSCRIBER') {
       this.router.navigate(['/profile', item.actor.id]);
     } else if (item.postId != null) {
-      this.router.navigate(['/profile', item.actor.id]);
+      console.log()
+      this.dialog.open<PostDetailComponent, PostDetailData, PostDetailResult>(
+        PostDetailComponent,
+        {
+          data: { postId: item.postId },
+          panelClass: 'post-detail-panel',
+          autoFocus: false,
+        },
+      );
     }
   }
 }

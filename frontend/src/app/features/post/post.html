@@ -79,6 +79,16 @@
             </div>
             <p class="comment-content">{{ comment.content }}</p>
           </div>
+          @if (comment.author.id === currentUserId()) {
+            <button
+              mat-icon-button
+              type="button"
+              class="comment-delete"
+              (click)="deleteComment(comment.id)"
+              aria-label="Delete comment">
+              <mat-icon fontIcon="delete_outline" />
+            </button>
+          }
         </article>
         }
         @if (hasMore()) {

@@ -2,10 +2,19 @@ package com.zone01._blog.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-public record SignupRequest(@NotBlank String username,
-                            @NotBlank @Email String email,
-                            @NotBlank String password,
-                            String avatarUrl) {
+public record SignupRequest(
+        @NotBlank @Size(min = 3, max = 30) String username,
+        @NotBlank @Email String email,
+        @NotBlank
+        @Size(min = 8, max = 72, message = "must be at least 8 characters")
+        @Pattern(
+                regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$",
+                message = "must contain at least one letter and one digit"
+        )
+        String password,
+        String avatarUrl) {
 
 }

@@ -9,6 +9,7 @@ import { AdminPostsComponent } from './features/admin/admin-posts/admin-posts';
 import { AdminReportsComponent } from './features/admin/admin-reports/admin-reports';
 import { UserComponent } from './features/user/user';
 import { SettingsComponent } from './features/settings/settings';
+import { NotFoundComponent } from './features/not-found/not-found';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -28,4 +29,5 @@ export const routes: Routes = [
 
     ]
   },
+  { path: '**', component: NotFoundComponent },
 ];

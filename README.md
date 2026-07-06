@@ -1,4 +1,130 @@
-# 01Blog — API Documentation
+# 01Blog
+
+A full-stack blogging platform where users can publish posts, follow other users, like and comment on content, and receive notifications. Admins moderate users, posts, and reports through a dedicated dashboard.
+
+## Tech Stack
+
+**Backend**
+- Java 17, Spring Boot 4
+- Spring Web, Spring Security (JWT auth via jjwt)
+- Spring Data JPA / Hibernate
+- PostgreSQL
+- Supabase Storage (media uploads)
+- Maven
+
+**Frontend**
+- Angular 21 with SSR (Node Express)
+- Angular Material + Angular CDK
+- TailwindCSS
+- Marked + DOMPurify (markdown rendering)
+
+**Infra**
+- Docker + Docker Compose
+- PostgreSQL (containerized)
+
+## Project Structure
+
+```
+.
+├── backend/                # Spring Boot API
+│   └── src/main/java/com/zone01/_blog/
+│       ├── auth/           # signup, login, JWT
+│       ├── user/           # user profile & account
+│       ├── post/           # posts CRUD & feed
+│       ├── comment/        # post comments
+│       ├── like/           # post likes
+│       ├── subscription/   # follow/unfollow
+│       ├── notification/   # activity notifications
+│       ├── report/         # user reporting
+│       ├── admin/          # moderation endpoints
+│       ├── settings/       # account settings
+│       ├── media/          # Supabase upload proxy
+│       ├── config/         # seeders & app config
+│       └── shared/         # exception handling, cross-cutting
+├── frontend/               # Angular SSR app
+│   └── src/app/
+│       ├── features/       # route-level feature modules
+│       ├── components/     # reusable UI (navbar, post-snippet, ...)
+│       ├── shared/         # cross-cutting services
+│       └── *.guard.ts      # route guards
+└── docker-compose.yml      # db + backend + frontend
+```
+
+## Prerequisites
+
+- Docker & Docker Compose (recommended path)
+
+Or, for running services natively:
+- Java 17+ and Maven 3.9+
+- Node.js 20+ and npm
+- PostgreSQL 15+
+
+## Getting Started
+
+### 1. Configure environment
+
+Create `backend/.env` from the example:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Fill in:
+
+```
+DB_URL=jdbc:postgresql://db:5432/mainDB
+DB_USERNAME=abdnour
+DB_PASSWORD=abdnour
+
+JWT_SECRET=<long-random-string>
+JWT_EXPIRATION_MS=3600000
+
+ADMIN_EMAIL=admin@example.com
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<admin-password>
+
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_SERVICE_KEY=<your-service-key>
+SUPABASE_BUCKET=Media
+```
+
+> When running with Docker, `DB_URL` must point at the `db` service hostname (`jdbc:postgresql://db:5432/mainDB`). When running natively, use `localhost:5433` (matches the port mapping in `docker-compose.yml`).
+
+### 2. Run with Docker (recommended)
+
+```bash
+docker compose up --build
+```
+
+Services:
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8080
+- PostgreSQL: `localhost:5433`
+
+### 3. Run natively (alternative)
+
+**Backend:**
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm start
+```
+
+The Angular dev server runs on http://localhost:4200 and proxies API calls to the backend at `http://localhost:8080`.
+
+## API Documentation
+
+Full API reference is below.
+
+---
+
+# API Documentation
 
 Base URL: `http://localhost:8080/api`
 

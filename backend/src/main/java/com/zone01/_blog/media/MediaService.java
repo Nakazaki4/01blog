@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -44,11 +45,15 @@ public class MediaService {
     public void delete(String publicUrl) {
         if (publicUrl == null) return;
         String filename = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
-        http.delete()
-                .uri(supabaseUrl + "/storage/v1/object/" + bucket + "/" + filename)
-                .header("apiKey", serviceKey)
-                .retrieve()
-                .toBodilessEntity();
+        try {
+            http.delete()
+                    .uri(supabaseUrl + "/storage/v1/object/" + bucket + "/" + filename)
+                    .header("apiKey", serviceKey)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            // Missing object or other 4xx from storage — treat as best-effort cleanup.
+        }
     }
 
     private void validate(byte[] file, String fileType) {

@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -152,6 +153,7 @@ public class PostService {
         return getById(postId, requesterId);
     }
 
+    @Transactional
     public void delete(Long postId, Long requesterId, boolean isAdmin) {
         Post post = postRepo.findById(postId)
                 .filter(p -> !p.isDeleted())
@@ -165,6 +167,7 @@ public class PostService {
             mediaService.delete(url);
         }
         postRepo.save(post);
+        notificationRepo.deleteByPostId(postId);
     }
 
     private List<String> extractImageUrls(String markdown) {

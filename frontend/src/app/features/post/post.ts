@@ -71,6 +71,10 @@ export class PostDetailComponent {
   postError = signal<string | null>(null);
 
   isAuthenticated = computed(() => !!this.auth.currentUser());
+  currentUserId = computed(() => {
+    const raw = this.auth.currentUser()?.userId;
+    return raw != null ? Number(raw) : null;
+  });
 
   commentContent = signal<string>('');
   comments = signal<CommentResponse[]>([]);
@@ -182,6 +186,18 @@ export class PostDetailComponent {
       },
       error: () => {
         this.submitting.set(false);
+      },
+    });
+  }
+
+  deleteComment(commentId: number): void {
+    const prev = this.comments();
+    this.comments.update((list) => list.filter((c) => c.id !== commentId));
+    this.commentCount.update((n) => Math.max(0, n - 1));
+    this.postService.deleteComment(commentId).subscribe({
+      error: () => {
+        this.comments.set(prev);
+        this.commentCount.update((n) => n + 1);
       },
     });
   }

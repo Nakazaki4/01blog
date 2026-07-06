@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.zone01._blog.admin.dto.AdminPostDto;
 import com.zone01._blog.admin.dto.AdminReportDto;
 import com.zone01._blog.admin.dto.AdminUserDto;
+import com.zone01._blog.notification.NotificationRepository;
 import com.zone01._blog.post.Post;
 import com.zone01._blog.post.PostRepository;
 import com.zone01._blog.post.dto.UserPost;
@@ -29,13 +30,16 @@ public class AdminService {
     private final UserRepository userRepo;
     private final PostRepository postRepo;
     private final ReportRepository reportRepo;
+    private final NotificationRepository notificationRepo;
 
     public AdminService(UserRepository userRepo,
-                        PostRepository postRepo, ReportRepository reportRepo
+                        PostRepository postRepo, ReportRepository reportRepo,
+                        NotificationRepository notificationRepo
     ) {
         this.userRepo = userRepo;
         this.postRepo = postRepo;
         this.reportRepo = reportRepo;
+        this.notificationRepo = notificationRepo;
     }
 
     public record AdminStats(long totalUsers, long totalPosts, long totalReports, long totalPendingReports) {}
@@ -121,6 +125,9 @@ public class AdminService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post doesn't exist");
         }
         postRepo.setHidden(postId, flag);
+        if (flag) {
+            notificationRepo.deleteByPostId(postId);
+        }
     }
 
     private AdminUserDto toAdminUserDto(User user) {

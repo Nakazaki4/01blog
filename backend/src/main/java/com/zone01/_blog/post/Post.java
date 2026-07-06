@@ -34,6 +34,6 @@ public class Post {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
     private boolean hidden = false;
 }

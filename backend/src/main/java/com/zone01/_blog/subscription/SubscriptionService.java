@@ -79,5 +79,7 @@ public class SubscriptionService {
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Not subscribed");
         }
+        notificationRepo.deleteByActorAndRecipientAndType(
+                subscriberId, subscribedToId, NotificationType.NEW_SUBSCRIBER);
     }
 }

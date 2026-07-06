@@ -86,4 +86,8 @@ export class PostSnippetService {
       { content },
     );
   }
+
+  deleteComment(commentId: number): Observable<void> {
+    return this.http.delete<void>(`http://localhost:8080/api/comments/${commentId}`);
+  }
 }

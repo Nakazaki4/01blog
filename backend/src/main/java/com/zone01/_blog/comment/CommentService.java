@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.comment.dto.CommentResponse;
@@ -94,6 +95,23 @@ public class CommentService {
         }
         return commentRepo.findByPostIdOrderByCreatedAtDesc(postId, PageRequest.of(page, size))
                 .map(this::toResponse);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepo.findById(commentId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this comment");
+        }
+        Long postId = comment.getPost().getId();
+        Long recipientId = comment.getPost().getUser().getId();
+        commentRepo.delete(comment);
+        commentRepo.flush();
+        if (!commentRepo.existsByPostIdAndUserId(postId, userId)) {
+            notificationRepo.deleteByActorAndRecipientAndTypeAndPost(
+                    userId, recipientId, NotificationType.NEW_COMMENT, postId);
+        }
     }
 
     private CommentResponse toResponse(Comment comment) {
