@@ -1,14 +1,14 @@
 <section class="composer">
   @if (currentImages().length) {
     <div class="composer-thumbnails">
-      @for (url of currentImages(); track url) {
+      @for (image of currentImages(); track $index) {
         <div class="thumbnail">
-          <img [src]="url" alt="Post image" />
+          <img [src]="image.url" alt="Post image" />
           <button
             type="button"
             mat-icon-button
             class="thumbnail-remove"
-            (click)="removeImage(url)"
+            (click)="removeImage(image.url, image.occurrence)"
             [disabled]="submitting()"
             aria-label="Remove image">
             <mat-icon>close</mat-icon>

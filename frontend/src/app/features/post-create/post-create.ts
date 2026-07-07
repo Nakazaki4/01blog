@@ -54,13 +54,17 @@ export class PostCreateComponent {
   outOfRange = computed(() => this.tooShort() || this.tooLong());
   isEditMode = computed(() => this.postId() !== null);
   currentImages = computed(() => {
-    const urls: string[] = [];
+    const images: { url: string; occurrence: number }[] = [];
+    const counts = new Map<string, number>();
     const re = new RegExp(IMAGE_MARKDOWN);
     let match: RegExpExecArray | null;
     while ((match = re.exec(this.body())) !== null) {
-      urls.push(match[1]);
+      const url = match[1];
+      const occurrence = counts.get(url) ?? 0;
+      images.push({ url, occurrence });
+      counts.set(url, occurrence + 1);
     }
-    return urls;
+    return images;
   });
 
   constructor() {
@@ -77,11 +81,17 @@ export class PostCreateComponent {
     this.fileInput().nativeElement.click();
   }
 
-  removeImage(url: string): void {
+  removeImage(url: string, occurrence: number): void {
     if (this.submitting()) return;
     const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = new RegExp(`\\n?!\\[[^\\]]*\\]\\(${escaped}\\)\\n?`, 'g');
-    this.body.set(this.body().replace(pattern, '\n'));
+    const body = this.body();
+    let seen = 0;
+    const next = body.replace(pattern, (full) => {
+      if (seen++ === occurrence) return '\n';
+      return full;
+    });
+    this.body.set(next);
   }
 
   onFileSelected(event: Event): void {

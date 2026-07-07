@@ -241,7 +241,6 @@ export class NavbarComponent {
     if (item.type === 'NEW_SUBSCRIBER') {
       this.router.navigate(['/profile', item.actor.id]);
     } else if (item.postId != null) {
-      console.log()
       this.dialog.open<PostDetailComponent, PostDetailData, PostDetailResult>(
         PostDetailComponent,
         {
