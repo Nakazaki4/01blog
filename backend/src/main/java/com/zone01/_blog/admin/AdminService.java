@@ -165,10 +165,15 @@ public class AdminService {
     private AdminReportDto toAdminReportDto(Report report) {
         User reporter = report.getReporter();
         User reportedUser = report.getReportedUser();
+        Long reportedPostId = report.getReportedPost() != null
+                ? report.getReportedPost().getId()
+                : null;
         return new AdminReportDto(
                 report.getId(),
                 new UserPost(reporter.getId(), reporter.getUsername(), reporter.getAvatarUrl()),
                 new UserPost(reportedUser.getId(), reportedUser.getUsername(), reportedUser.getAvatarUrl()),
+                report.getType(),
+                reportedPostId,
                 report.getReason(),
                 report.getStatus(),
                 report.getCreatedAt()

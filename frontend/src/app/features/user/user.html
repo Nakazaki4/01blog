@@ -27,6 +27,20 @@
               (click)="toggleSubscription()">
               {{ p.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
             </button>
+            <button
+              mat-icon-button
+              type="button"
+              class="profile-menu-trigger"
+              [matMenuTriggerFor]="profileMenu"
+              aria-label="Profile actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #profileMenu="matMenu">
+              <button mat-menu-item (click)="reportProfile()">
+                <mat-icon>flag</mat-icon>
+                <span>Report</span>
+              </button>
+            </mat-menu>
           }
         </div>
 

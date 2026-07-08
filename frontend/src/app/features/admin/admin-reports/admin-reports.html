@@ -33,25 +33,41 @@
   } @else {
     <div class="report-list">
       @for (report of reports(); track report.id) {
-        <article class="report-card">
+        <article
+          class="report-card report-card-clickable"
+          role="button"
+          tabindex="0"
+          (click)="openReportTarget(report)"
+          (keydown.enter)="openReportTarget(report)"
+          (keydown.space)="openReportTarget(report)">
           <div class="report-main">
             <div class="report-title">
               <strong>{{ report.reportedUser.username }}</strong>
               <span
+                class="type-badge"
+                [class.type-user]="report.type === 'USER'"
+                [class.type-post]="report.type === 'POST'">
+                {{ report.type === 'POST' ? 'Post' : 'User' }}
+              </span>
+              <span
                 class="status"
                 [class.pending]="report.status === 'PENDING'"
-                [class.reviewed]="report.status === 'REVIEWED'"
-                {{ report.status }}>
+                [class.reviewed]="report.status === 'REVIEWED'">
+                {{ report.status }}
               </span>
             </div>
             <p>{{ report.reason }}</p>
             <div class="report-meta">
               <span>Reported by {{ report.reporter.username }}</span>
+              @if (report.type === 'POST' && report.reportedPostId !== null) {
+                <span>·</span>
+                <span>Post #{{ report.reportedPostId }}</span>
+              }
               <time>{{ report.createdAt | date: 'medium' }}</time>
             </div>
           </div>
 
-          <div class="row-actions">
+          <div class="row-actions" (click)="$event.stopPropagation()">
             @if (report.status !== 'REVIEWED') {
               <button
                 mat-stroked-button

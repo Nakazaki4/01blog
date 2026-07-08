@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.zone01._blog.post.Post;
 import com.zone01._blog.user.User;
 
 import jakarta.persistence.Column;
@@ -27,7 +28,7 @@ import lombok.Setter;
 @Table(
     name = "reports",
     uniqueConstraints = @UniqueConstraint(
-        columnNames = {"reported_user_id", "reporter_id", "status"}
+        columnNames = {"reported_user_id", "reporter_id", "type", "status"}
     )
 )
 @Getter
@@ -46,6 +47,15 @@ public class Report {
     @JoinColumn(name = "reported_user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User reportedUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reported_post_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private Post reportedPost;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private ReportType type = ReportType.USER;
 
     @Column(nullable = false, columnDefinition = "text")
     private String reason;

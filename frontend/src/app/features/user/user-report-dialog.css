@@ -1,0 +1,9 @@
+.hint {
+  margin: 0 0 0.75rem;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.reason-field {
+  width: 100%;
+}

@@ -1,9 +1,16 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AdminReport, AdminService, ReportStatus } from '../admin.service';
+import {
+  PostDetailComponent,
+  PostDetailData,
+  PostDetailResult,
+} from '../../post/post';
 
 const PAGE_SIZE = 10;
 type ReportFilter = ReportStatus | 'ALL';
@@ -16,6 +23,8 @@ type ReportFilter = ReportStatus | 'ALL';
 })
 export class AdminReportsComponent implements OnInit {
   private admin = inject(AdminService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   reports = signal<AdminReport[]>([]);
   loading = signal(false);
@@ -52,6 +61,21 @@ export class AdminReportsComponent implements OnInit {
   onStatusChange(event: Event): void {
     this.selectedStatus.set((event.target as HTMLSelectElement).value as ReportFilter);
     this.loadReports(0);
+  }
+
+  openReportTarget(report: AdminReport): void {
+    if (report.type === 'POST' && report.reportedPostId !== null) {
+      this.dialog.open<PostDetailComponent, PostDetailData, PostDetailResult>(
+        PostDetailComponent,
+        {
+          data: { postId: report.reportedPostId },
+          panelClass: 'post-detail-panel',
+          autoFocus: false,
+        },
+      );
+      return;
+    }
+    this.router.navigate(['/profile', report.reportedUser.id]);
   }
 
   updateStatus(report: AdminReport, status: ReportStatus): void {

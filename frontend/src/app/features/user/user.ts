@@ -17,12 +17,17 @@ import { PostHost } from '../../components/post-snippet/post-host';
 import { PostSnippetService } from '../../components/post-snippet/post-snippet.service';
 import { UserProfile, UserService } from './user.service';
 import { AdminService } from '../admin/admin.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { UserReportDialogComponent } from './user-report-dialog';
 
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-user',
-  imports: [Post],
+  imports: [Post, MatIconModule, MatMenuModule, MatButtonModule],
   templateUrl: './user.html',
   styleUrl: './user.css',
 })
@@ -34,6 +39,7 @@ export class UserComponent extends PostHost {
   private adminService = inject(AdminService);
   private destroyRef = inject(DestroyRef);
   private injector = inject(Injector);
+  private dialog = inject(MatDialog);
 
   profile = signal<UserProfile | null>(null);
   posts = signal<PostResponse[] | []>([])
@@ -150,6 +156,15 @@ export class UserComponent extends PostHost {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  reportProfile(): void {
+    const p = this.profile();
+    if (!p || this.isSelf() || !this.isAuthenticated()) return;
+    this.dialog.open(UserReportDialogComponent, {
+      data: { reportedUserId: p.id },
+      autoFocus: false,
+    });
   }
 
   toggleSubscription(): void {

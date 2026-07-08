@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.report.dto.ReportRequest;
 import com.zone01._blog.report.dto.ReportResponse;
+import com.zone01._blog.report.dto.UserReportRequest;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -29,10 +30,20 @@ public class ReportController {
         return Long.parseLong(principal);
     }
 
+    @PostMapping("/user")
+    public ResponseEntity<ReportResponse> reportUser(@AuthenticationPrincipal String userId,
+            @RequestBody UserReportRequest requestBody) {
+        return ResponseEntity.ok(reportService.validateAndSaveUserReport(
+                requireUserId(userId),
+                Long.parseLong(requestBody.reportedUserId()),
+                requestBody.reason()));
+    }
+    
     @PostMapping
     public ResponseEntity<ReportResponse> postReport(@AuthenticationPrincipal String userId,
             @RequestBody ReportRequest requestBody) {
         return ResponseEntity.ok(reportService.ValidateAndSaveReport(requireUserId(userId), Long.parseLong(requestBody.postId()),
                 requestBody.reason()));
     }
+
 }

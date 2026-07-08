@@ -32,6 +32,8 @@ export interface AdminPost extends PostResponse {
 
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'DISMISSED';
 
+export type ReportType = 'USER' | 'POST';
+
 export interface AdminReportUser {
   id: number;
   username: string;
@@ -41,6 +43,8 @@ export interface AdminReport {
   id: number;
   reporter: AdminReportUser;
   reportedUser: AdminReportUser;
+  type: ReportType;
+  reportedPostId: number | null;
   reason: string;
   status: ReportStatus;
   createdAt: string;
