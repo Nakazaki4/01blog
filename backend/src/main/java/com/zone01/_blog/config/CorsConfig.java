@@ -1,4 +1,4 @@
-package com.zone01._blog.auth;
+package com.zone01._blog.config;
 
 import java.util.List;
 
