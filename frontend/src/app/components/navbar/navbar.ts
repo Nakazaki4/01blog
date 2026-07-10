@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +8,9 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
+import { of, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../features/auth/auth.service';
 import { PostCreateDialogComponent } from '../../features/post-create/post-create-dialog';
 import { PostResponse } from '../post-snippet/post-snippet';
@@ -21,6 +25,7 @@ import {
   NotificationService,
   NotificationType,
 } from '../../features/notification/notification.service';
+import { SearchService, SearchUser } from '../../features/search/search.service';
 
 import { ThemeService } from '../../shared/theme.service';
 
@@ -28,6 +33,7 @@ import { ThemeService } from '../../shared/theme.service';
   selector: 'app-navbar',
   imports: [
     DatePipe,
+    FormsModule,
     RouterLink,
     MatIconModule,
     MatButtonModule,
@@ -44,6 +50,7 @@ export class NavbarComponent {
   private dialog = inject(MatDialog);
   private postEvents = inject(PostEventsService);
   private notifications = inject(NotificationService);
+  private search = inject(SearchService);
   theme = inject(ThemeService);
 
   user = this.auth.currentUser;
@@ -51,13 +58,47 @@ export class NavbarComponent {
   isAdmin = computed(() => this.auth.isAdmin());
 
   unreadCount = this.notifications.unreadCount;
-  
+
   items = signal<NotificationResponse[]>([]);
   loading = signal(false);
   loadError = signal<string | null>(null);
   private notifPage = 0;
   private notifHasMore = false;
   loadingMore = signal(false);
+
+  searchQuery = signal('');
+  searchResults = signal<SearchUser[]>([]);
+  searchLoading = signal(false);
+  searchOpen = signal(false);
+  private searchInput$ = new Subject<string>();
+
+  constructor() {
+    this.searchInput$
+      .pipe(
+        debounceTime(250),
+        distinctUntilChanged(),
+        switchMap((keyword) => {
+          const trimmed = keyword.trim();
+          if (trimmed.length === 0) {
+            this.searchLoading.set(false);
+            return of<SearchUser[]>([]);
+          }
+          this.searchLoading.set(true);
+          return this.search.searchUsers(trimmed);
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe({
+        next: (users) => {
+          this.searchResults.set(users);
+          this.searchLoading.set(false);
+        },
+        error: () => {
+          this.searchResults.set([]);
+          this.searchLoading.set(false);
+        },
+      });
+  }
 
   redirectToDashboard(): void {
     this.router.navigate(['/admin']);
@@ -76,6 +117,36 @@ export class NavbarComponent {
   goToProfile(): void {
     const id = this.user()?.userId;
     if (id != null) this.router.navigate(['/profile', id]);
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery.set(value);
+    this.searchOpen.set(true);
+    this.searchInput$.next(value);
+  }
+
+  onSearchFocus(): void {
+    if (this.searchQuery().trim().length > 0) {
+      this.searchOpen.set(true);
+    }
+  }
+
+  onSearchBlur(): void {
+    setTimeout(() => this.searchOpen.set(false), 150);
+  }
+
+  onSearchResultClick(user: SearchUser): void {
+    this.searchOpen.set(false);
+    this.searchQuery.set('');
+    this.searchResults.set([]);
+    this.router.navigate(['/profile', user.id]);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.searchResults.set([]);
+    this.searchOpen.set(false);
+    this.searchInput$.next('');
   }
 
   goToSettings(): void {

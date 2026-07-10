@@ -51,7 +51,7 @@ public class PostService {
     }
 
     public List<FeedPost> getFeed(Long userId, int page, int size) {
-        return postRepo.findFeedForUser(userId, PageRequest.of(page, size)).toList();
+        return postRepo.findFeedForUser(userId, PageRequest.of(page, size));
     }
 
     public List<FeedPost> getPublicFeed() {
@@ -70,7 +70,7 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable).toList();
+        return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable);
     }
 
     public PostResponse create(Long authorId, String description) {

@@ -43,7 +43,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
       )
     ORDER BY p.createdAt DESC
 """)
-    Page<FeedPost> findFeedForUser(@Param("userId") Long userId, Pageable pageable);
+    List<FeedPost> findFeedForUser(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
         SELECT new com.zone01._blog.post.dto.FeedPost(
@@ -94,7 +94,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             WHERE p.user.id = :authorId AND p.deleted = false AND p.hidden = false
             ORDER BY p.createdAt DESC
             """)
-    Page<FeedPost> findByAuthorWithCounts(@Param("authorId") Long authorId, @Param("viewerId") Long viewerId, Pageable pageable);
+    List<FeedPost> findByAuthorWithCounts(@Param("authorId") Long authorId, @Param("viewerId") Long viewerId, Pageable pageable);
 
     @Query("""
             SELECT p,

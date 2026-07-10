@@ -69,7 +69,7 @@ public class AdminService {
     @Transactional
     public List<AdminPostDto> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return postRepo.findAllWithAdminCounts(pageable).map(this::toAdminPostDto).toList();
+        return postRepo.findAllWithAdminCounts(pageable).stream().map(this::toAdminPostDto).toList();
     }
 
     @Transactional

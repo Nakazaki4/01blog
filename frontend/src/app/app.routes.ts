@@ -11,10 +11,11 @@ import { UserComponent } from './features/user/user';
 import { SettingsComponent } from './features/settings/settings';
 import { NotFoundComponent } from './features/not-found/not-found';
 import { authGuard } from './auth.guard';
+import { guestGuard } from './guest.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
   { path: '', component: HomeComponent },
   { path: 'profile/:id', component: UserComponent },
   { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
