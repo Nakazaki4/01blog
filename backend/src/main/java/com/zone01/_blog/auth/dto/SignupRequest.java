@@ -6,8 +6,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record SignupRequest(
-        @NotBlank @Size(min = 3, max = 30) String username,
-        @NotBlank @Email String email,
+        @NotBlank
+        @Size(min = 3, max = 30)
+        @Pattern(
+                regexp = "^[A-Za-z0-9]([A-Za-z0-9]|[._-](?![._-])){1,28}[A-Za-z0-9]$",
+                message = "must be 3-30 chars: letters, digits, and . _ - (no leading/trailing or consecutive separators)"
+        )
+        String username,
+        @NotBlank
+        @Email
+        String email,
         @NotBlank
         @Size(min = 8, max = 72, message = "must be at least 8 characters")
         @Pattern(

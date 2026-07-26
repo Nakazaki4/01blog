@@ -1,8 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { openConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { AdminService, AdminUser } from '../admin.service';
 
 const PAGE_SIZE = 10;
@@ -16,6 +18,7 @@ const PAGE_SIZE = 10;
 })
 export class AdminUsersComponent implements OnInit {
   private admin = inject(AdminService);
+  private dialog = inject(MatDialog);
 
   users = signal<AdminUser[]>([]);
   loading = signal(false);
@@ -61,8 +64,18 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers(0);
   }
 
-  toggleBan(user: AdminUser): void {
+  async toggleBan(user: AdminUser): Promise<void> {
     if (this.isActionPending(user.id)) return;
+    const willBan = !user.banned;
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: willBan ? 'Ban user?' : 'Unban user?',
+      message: willBan
+        ? `${user.username} will be prevented from signing in and posting.`
+        : `${user.username} will regain access to their account.`,
+      confirmLabel: willBan ? 'Ban' : 'Unban',
+      variant: willBan ? 'warn' : 'primary',
+    });
+    if (!confirmed) return;
     this.setActionPending(user.id, true);
     const request = user.banned ? this.admin.unbanUser(user.id) : this.admin.banUser(user.id);
     request.subscribe({
@@ -81,9 +94,15 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  deleteUser(user: AdminUser): void {
+  async deleteUser(user: AdminUser): Promise<void> {
     if (this.isActionPending(user.id)) return;
-    if (!confirm(`Delete ${user.username} and their content?`)) return;
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: 'Delete user?',
+      message: `${user.username} and all their content will be permanently removed. This cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'warn',
+    });
+    if (!confirmed) return;
     this.setActionPending(user.id, true);
     this.admin.deleteUser(user.id).subscribe({
       next: () => {

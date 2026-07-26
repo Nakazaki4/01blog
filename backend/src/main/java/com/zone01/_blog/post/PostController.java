@@ -83,7 +83,7 @@ public class PostController {
     public ResponseEntity<Map<String, String>> uploadImage(
             @AuthenticationPrincipal String userId,
             @RequestParam("image") MultipartFile image) {
-        String url = postService.storeImage(image);
+        String url = postService.storeImage(Long.parseLong(userId), image);
         return ResponseEntity.ok(Map.of("url", url));
     }
 

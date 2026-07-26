@@ -52,7 +52,7 @@ public class MediaService {
                     .retrieve()
                     .toBodilessEntity();
         } catch (RestClientResponseException e) {
-            // Missing object or other 4xx from storage — treat as best-effort cleanup.
+            // Missing object or other 4xx from storage — treat as best-effort cleanup. 
         }
     }
 

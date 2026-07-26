@@ -65,9 +65,14 @@ public class SettingsService {
             BufferedImage image
                     = ImageIO.read(file.getInputStream());
             if (image == null) {
-                throw new IllegalArgumentException("Invalid image");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Invalid image"
+                );
             }
             webp = convertToWebp(file);
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,

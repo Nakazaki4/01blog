@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zone01._blog.media.MediaService;
+import com.zone01._blog.media.PendingUpload;
+import com.zone01._blog.media.PendingUploadRepository;
 import com.zone01._blog.notification.Notification;
 import com.zone01._blog.notification.NotificationRepository;
 import com.zone01._blog.notification.NotificationType;
@@ -34,20 +36,24 @@ import com.zone01._blog.user.UserRepository;
 public class PostService {
 
     private static final Pattern MARKDOWN_IMAGE = Pattern.compile("!\\[[^\\]]*\\]\\(([^)\\s]+)\\)");
+    private static final int MAX_IMAGES_PER_POST = 10;
 
     private final PostRepository postRepo;
     private final UserRepository userRepo;
     private final MediaService mediaService;
     private final NotificationRepository notificationRepo;
     private final SubscriptionRepository subscriptionRepo;
+    private final PendingUploadRepository pendingUploads;
 
     public PostService(PostRepository postRepo, UserRepository userRepo, MediaService mediaService,
-            NotificationRepository notifRepo, SubscriptionRepository subscriptionRepo) {
+            NotificationRepository notifRepo, SubscriptionRepository subscriptionRepo,
+            PendingUploadRepository pendingUploads) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.mediaService = mediaService;
         this.notificationRepo = notifRepo;
         this.subscriptionRepo = subscriptionRepo;
+        this.pendingUploads = pendingUploads;
     }
 
     public List<FeedPost> getFeed(Long userId, int page, int size) {
@@ -73,6 +79,7 @@ public class PostService {
         return postRepo.findByAuthorWithCounts(authorId, viewerId, pageable);
     }
 
+    @Transactional
     public PostResponse create(Long authorId, String description) {
         if (description == null || description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
@@ -83,6 +90,13 @@ public class PostService {
         if (description.length() > 10000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At most 10000 characters allowed");
         }
+        List<String> images = extractImageUrls(description);
+        if (images.size() > MAX_IMAGES_PER_POST) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "At most " + MAX_IMAGES_PER_POST + " images allowed per post"
+            );
+        }
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
@@ -90,6 +104,10 @@ public class PostService {
         post.setUser(author);
         post.setDescription(description);
         Post saved = postRepo.save(post);
+
+        if (!images.isEmpty()) {
+            pendingUploads.deleteByUrlIn(images);
+        }
 
         // notify all subscribers
         List<User> subscribers = subscriptionRepo.findFollowersByFollowedId(authorId);
@@ -122,6 +140,7 @@ public class PostService {
         return n;
     }
 
+    @Transactional
     public PostResponse update(Long postId, Long requesterId, String description) {
         Post post = postRepo.findById(postId)
                 .filter(p -> !p.isDeleted())
@@ -142,6 +161,12 @@ public class PostService {
 
         List<String> previousImages = extractImageUrls(post.getDescription());
         List<String> nextImages = extractImageUrls(description);
+        if (nextImages.size() > MAX_IMAGES_PER_POST) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "At most " + MAX_IMAGES_PER_POST + " images allowed per post"
+            );
+        }
         for (String url : previousImages) {
             if (!nextImages.contains(url)) {
                 mediaService.delete(url);
@@ -150,6 +175,10 @@ public class PostService {
 
         post.setDescription(description);
         postRepo.save(post);
+
+        if (!nextImages.isEmpty()) {
+            pendingUploads.deleteByUrlIn(nextImages);
+        }
         return getById(postId, requesterId);
     }
 
@@ -182,16 +211,20 @@ public class PostService {
         return urls;
     }
 
-    public String storeImage(MultipartFile file) {
+    @Transactional
+    public String storeImage(Long uploaderId, MultipartFile file) {
         try {
             BufferedImage image
                     = ImageIO.read(file.getInputStream());
             if (image == null) {
-                throw new IllegalArgumentException("Invalid image");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image");
             }
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image");
         }
+
+        User uploader = userRepo.findById(uploaderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
         String supabaseUrl;
         try {
@@ -199,6 +232,12 @@ public class PostService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while processing image");
         }
+
+        PendingUpload pending = new PendingUpload();
+        pending.setUploader(uploader);
+        pending.setUrl(supabaseUrl);
+        pendingUploads.save(pending);
+
         return supabaseUrl;
     }
 

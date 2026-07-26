@@ -22,6 +22,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const MIN_CHARS = 2000;
 const MAX_CHARS = 10000;
+const MAX_IMAGES = 10;
 const IMAGE_MARKDOWN = /!\[[^\]]*\]\(([^)]+)\)/g;
 
 @Component({
@@ -48,11 +49,14 @@ export class PostCreateComponent {
 
   readonly minChars = MIN_CHARS;
   readonly maxChars = MAX_CHARS;
+  readonly maxImages = MAX_IMAGES;
   charCount = computed(() => this.body().length);
   tooShort = computed(() => this.charCount() < MIN_CHARS);
   tooLong = computed(() => this.charCount() > MAX_CHARS);
   outOfRange = computed(() => this.tooShort() || this.tooLong());
   isEditMode = computed(() => this.postId() !== null);
+  imageCount = computed(() => this.currentImages().length);
+  imageLimitReached = computed(() => this.imageCount() >= MAX_IMAGES);
   currentImages = computed(() => {
     const images: { url: string; occurrence: number }[] = [];
     const counts = new Map<string, number>();
@@ -78,6 +82,10 @@ export class PostCreateComponent {
 
   onPickImage(): void {
     if (this.uploading() || this.submitting()) return;
+    if (this.imageLimitReached()) {
+      this.error.set(`You can add at most ${MAX_IMAGES} images per post.`);
+      return;
+    }
     this.fileInput().nativeElement.click();
   }
 
@@ -100,6 +108,10 @@ export class PostCreateComponent {
     input.value = '';
     if (!file) return;
 
+    if (this.imageLimitReached()) {
+      this.error.set(`You can add at most ${MAX_IMAGES} images per post.`);
+      return;
+    }
     if (!ALLOWED_TYPES.includes(file.type)) {
       this.error.set('Only JPEG, PNG, WebP, or GIF images are allowed.');
       return;
@@ -153,6 +165,10 @@ export class PostCreateComponent {
     }
     if (description.length > MAX_CHARS) {
       this.error.set(`At most ${MAX_CHARS} characters allowed.`);
+      return;
+    }
+    if (this.imageCount() > MAX_IMAGES) {
+      this.error.set(`At most ${MAX_IMAGES} images allowed per post.`);
       return;
     }
     if (this.uploading() || this.submitting()) return;

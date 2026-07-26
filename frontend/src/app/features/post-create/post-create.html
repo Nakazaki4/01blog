@@ -40,10 +40,14 @@
         type="button"
         mat-button
         (click)="onPickImage()"
-        [disabled]="uploading() || submitting()">
+        [disabled]="uploading() || submitting() || imageLimitReached()">
         <mat-icon>image</mat-icon>
         Insert image
       </button>
+
+      <span class="image-counter" [class.limit]="imageLimitReached()">
+        {{ imageCount() }} / {{ maxImages }} images
+      </span>
 
       @if (uploading()) {
         <span class="composer-uploading">

@@ -1,22 +1,20 @@
 package com.zone01._blog.notification;
 
-import com.zone01._blog.notification.dto.NotificationResponse;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.PatchMapping;
+import com.zone01._blog.notification.dto.NotificationResponse;
 
 @RestController
 @RequestMapping("/api/notifications")

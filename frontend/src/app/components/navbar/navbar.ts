@@ -54,7 +54,7 @@ export class NavbarComponent {
   theme = inject(ThemeService);
 
   user = this.auth.currentUser;
-  isAuthenticated = computed(() => !!this.user());
+  isAuthenticated = computed(() => !!this.user());  
   isAdmin = computed(() => this.auth.isAdmin());
 
   unreadCount = this.notifications.unreadCount;

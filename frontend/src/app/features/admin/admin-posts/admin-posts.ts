@@ -2,8 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { openConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { stripMarkdown } from '../../../shared/markdown';
 import { AdminPost, AdminService } from '../admin.service';
 
@@ -17,6 +19,7 @@ const PAGE_SIZE = 10;
 })
 export class AdminPostsComponent implements OnInit {
   private admin = inject(AdminService);
+  private dialog = inject(MatDialog);
 
   posts = signal<AdminPost[]>([]);
   loading = signal(false);
@@ -50,9 +53,15 @@ export class AdminPostsComponent implements OnInit {
     });
   }
 
-  deletePost(post: AdminPost): void {
+  async deletePost(post: AdminPost): Promise<void> {
     if (this.isActionPending(post.id)) return;
-    if (!confirm(`Delete post #${post.id}?`)) return;
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: 'Delete post?',
+      message: `Post #${post.id} by ${post.author.username} will be permanently removed. This cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'warn',
+    });
+    if (!confirmed) return;
     this.setActionPending(post.id, true);
     this.admin.deletePost(post.id).subscribe({
       next: () => {
@@ -67,9 +76,18 @@ export class AdminPostsComponent implements OnInit {
     });
   }
 
-  toggleHide(post: AdminPost): void {
+  async toggleHide(post: AdminPost): Promise<void> {
     if (this.isActionPending(post.id)) return;
     const willHide = !post.hidden;
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: willHide ? 'Hide post?' : 'Unhide post?',
+      message: willHide
+        ? `Post #${post.id} will be hidden from the feed until unhidden.`
+        : `Post #${post.id} will become visible in the feed again.`,
+      confirmLabel: willHide ? 'Hide' : 'Unhide',
+      variant: willHide ? 'warn' : 'primary',
+    });
+    if (!confirmed) return;
     this.setActionPending(post.id, true);
     const request = willHide ? this.admin.hidePost(post.id) : this.admin.unhidePost(post.id);
     request.subscribe({

@@ -1,18 +1,17 @@
 package com.zone01._blog.notification;
 
-import com.zone01._blog.notification.dto.NotificationResponse;
-import com.zone01._blog.post.Post;
-import com.zone01._blog.post.dto.UserPost;
-import com.zone01._blog.user.User;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import com.zone01._blog.notification.dto.NotificationResponse;
+import com.zone01._blog.post.Post;
+import com.zone01._blog.post.dto.UserPost;
+import com.zone01._blog.user.User;
 
 @Service
 public class NotificationService {

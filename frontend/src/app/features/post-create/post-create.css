@@ -71,6 +71,16 @@
   font-size: 0.875rem;
 }
 
+.image-counter {
+  font-size: 0.8125rem;
+  color: var(--gray-700);
+}
+
+.image-counter.limit {
+  color: var(--hot-red);
+  font-weight: 500;
+}
+
 .composer-error {
   margin: 0;
   color: var(--hot-red);

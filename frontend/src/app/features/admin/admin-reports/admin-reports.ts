@@ -11,6 +11,7 @@ import {
   PostDetailData,
   PostDetailResult,
 } from '../../post/post';
+import { openConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 
 const PAGE_SIZE = 10;
 type ReportFilter = ReportStatus | 'ALL';
@@ -78,8 +79,18 @@ export class AdminReportsComponent implements OnInit {
     this.router.navigate(['/profile', report.reportedUser.id]);
   }
 
-  updateStatus(report: AdminReport, status: ReportStatus): void {
+  async updateStatus(report: AdminReport, status: ReportStatus): Promise<void> {
     if (this.isActionPending(report.id)) return;
+    const markReviewed = status === 'REVIEWED';
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: markReviewed ? 'Mark report reviewed?' : 'Reopen report?',
+      message: markReviewed
+        ? `Report against ${report.reportedUser.username} will be marked as reviewed.`
+        : `Report against ${report.reportedUser.username} will be moved back to pending.`,
+      confirmLabel: markReviewed ? 'Mark reviewed' : 'Reopen',
+      variant: 'primary',
+    });
+    if (!confirmed) return;
     this.setActionPending(report.id, true);
     this.admin.updateReportStatus(report.id, status).subscribe({
       next: (updated) => {
