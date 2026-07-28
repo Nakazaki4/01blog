@@ -10,6 +10,12 @@
   padding: 2rem 1rem;
 }
 
+@media (max-width: 480px) {
+  .settings-shell {
+    padding: 1rem 0.5rem;
+  }
+}
+
 .settings-card {
   width: 100%;
   max-width: 480px;
@@ -31,6 +37,13 @@
   border-radius: 1rem;
   background: #fff;
   position: relative;
+}
+
+@media (max-width: 480px) {
+  .settings-section {
+    padding: 1.125rem;
+    border-radius: 0.75rem;
+  }
 }
 
 .settings-section::before {

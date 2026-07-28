@@ -12,6 +12,15 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+@media (max-width: 480px) {
+  .post-card {
+    padding: 0.875rem;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+    border-radius: 0.75rem;
+  }
+}
+
 .post-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 24px -12px color-mix(in srgb, var(--electric-violet) 35%, transparent);

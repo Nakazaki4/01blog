@@ -34,6 +34,7 @@ export class ReportDialogComponent {
   snackBar = inject(MatSnackBar)
 
   reason = signal('');
+  submitting = signal(false);
   http = inject(HttpClient);
 
   constructor(
@@ -45,9 +46,9 @@ export class ReportDialogComponent {
   submit(): void {
     const trimmed = this.reason().trim();
 
-    if (!trimmed) return;
+    if (!trimmed || this.submitting()) return;
 
-    this.dialogRef.close(trimmed);
+    this.submitting.set(true);
 
     const payload = {
       postId: this.data.postId,
@@ -56,12 +57,14 @@ export class ReportDialogComponent {
 
     this.http.post<ReportResponse>(`${this.API_URL}`, payload)
       .subscribe({
-        next: (response) => {
+        next: () => {
+          this.submitting.set(false);
+          this.snackBar.open('Report submitted', 'Close', { duration: 3000 });
           this.dialogRef.close(trimmed);
         },
         error: (err) => {
-          console.log(err);
-          
+          this.submitting.set(false);
+
           let message = 'Something went wrong';
 
           if (err.status === 409) {
@@ -73,8 +76,6 @@ export class ReportDialogComponent {
           this.snackBar.open(message, 'Close', {
             duration: 4000,
           });
-
-          console.error(err);
         }
       })
   }

@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserReportDialogComponent } from './user-report-dialog';
 
 const PAGE_SIZE = 20;
@@ -40,6 +41,7 @@ export class UserComponent extends PostHost {
   private destroyRef = inject(DestroyRef);
   private injector = inject(Injector);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   profile = signal<UserProfile | null>(null);
   posts = signal<PostResponse[] | []>([])
@@ -183,7 +185,7 @@ export class UserComponent extends PostHost {
       : this.userService.unsubscribe(p.id);
     call.subscribe({
       next: () => this.subscribePending.set(false),
-      error: () => {
+      error: (err) => {
         const current = this.profile();
         if (current) {
           this.profile.set({
@@ -193,6 +195,9 @@ export class UserComponent extends PostHost {
           });
         }
         this.subscribePending.set(false);
+        const action = nextSubscribed ? 'subscribe' : 'unsubscribe';
+        const message = err?.error?.message ?? `Failed to ${action}. Please try again.`;
+        this.snackBar.open(message, 'Close', { duration: 4000 });
       },
     });
   }

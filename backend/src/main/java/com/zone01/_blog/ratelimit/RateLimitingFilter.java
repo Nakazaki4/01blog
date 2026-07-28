@@ -15,8 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-    private static final int MAX_REQUESTS_PER_SECOND = 6;
-    private static final int REFILL_RATE_PER_SECOND = 2;
+    private static final int MAX_REQUESTS_PER_SECOND = 60;
+    private static final int REFILL_RATE_PER_SECOND = 20;
     private final Map<String, TokenBucket> buckets = new ConcurrentHashMap<>();
 
     @Override

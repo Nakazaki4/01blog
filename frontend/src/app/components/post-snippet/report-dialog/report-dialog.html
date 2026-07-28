@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Report this user</h2>
+<h2 mat-dialog-title>Report this post</h2>
 
 <mat-dialog-content>
   <p class="hint">Tell us what's wrong. An admin will review this report.</p>
@@ -17,13 +17,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">Cancel</button>
   <button
     mat-raised-button
     color="warn"
     type="button"
     (click)="submit()"
-    [disabled]="!reason().trim()">
-    Submit report
+    [disabled]="!reason().trim() || submitting()">
+    {{ submitting() ? 'Submitting…' : 'Submit report' }}
   </button>
 </mat-dialog-actions>

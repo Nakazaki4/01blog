@@ -15,6 +15,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .brand {
@@ -34,8 +35,27 @@
 .search-wrap {
   position: relative;
   flex: 1;
+  min-width: 12rem;
   max-width: 22rem;
   margin: 0 1rem;
+}
+
+@media (max-width: 640px) {
+  .navbar-inner {
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .search-wrap {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+    margin: 0.25rem 0 0;
+  }
+
+  .brand {
+    font-size: 1.25rem;
+  }
 }
 
 .search-box {
