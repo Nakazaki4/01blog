@@ -26,7 +26,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "notifications", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"actor_id", "recipient_id", "type", "post_id"})
+    @UniqueConstraint(columnNames = {"id", "actor_id", "recipient_id", "type", "post_id"})
 })
 @Getter
 @Setter
